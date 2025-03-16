@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/nav_style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/register_style.css')}}">
+    <style>
+        
+    </style>
+    <title>UMS | Home</title>
+</head>
+
+<body>
+    <nav class="nav">
+        <ul>
+            <li><a href="#">UMS</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="SignIn.html" class="active">Sign In/Sign Up</a></li>
+        </ul>
+    </nav>
+    <div class="registration">
+        <div>
+            <label for="userType">Select User Type</label>
+            <select id="userType" onchange="toggleForm()">
+                <option value="" selected>Select User Type</option>
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+            </select>
+        </div>
+        <div id="studentForm" style="display: none;">
+            <form action="/register" method="POST">
+                <div>
+                    <label for="firstname">Name</label>
+                    <div>
+                        <input type="text" name="firstname" id="studentFirstname" placeholder="Firstname">
+                        <input type="text" name="middlename" id="studentMiddlename" placeholder="Middlename">
+                        <input type="text" name="lastname" id="studentLastname" placeholder="Lastname">
+                    </div>
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="studentEmail" placeholder="Email">
+                </div>
+                <div>
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" name="dob" id="dob">
+                </div>
+                <div>
+                    <label for="address">Address</label>
+                    <div>
+
+                        <input type="text" name="street" id="street" placeholder="Street">
+                        <input type="text" name="district" id="district" placeholder="district">
+                        <input type="text" name="state" id="state" placeholder="State">
+                        <input type="text" name="country" id="country" placeholder="Country">
+                    </div>
+                </div>
+                <div>
+                    <label for="phone">Phone Number</label>
+                    <input type="text" name="phone" id="studentPhone" placeholder="Phone Number">
+                </div>
+                <div>
+                    <button type="submit">Register as Student</button>
+                </div>
+            </form>
+        </div>
+        <div id="facultyForm" style="display: none;">
+            <form action="/register" method="POST">
+                <div>
+                    <label for="name">Name</label>
+                    <div>
+                        <input type="text" name="firstname" id="firstname" placeholder="Firstname">
+                        <input type="text" name="middlename" id="middlename" placeholder="Middlename">
+                        <input type="text" name="lastname" id="lastname" placeholder="Lastname">
+                    </div>
+                </div>
+                <div>
+                    <label for="facultyDOJ">Date of Joining</label>
+                    <input type="date" name="facultyDOJ" id="facultyDOJ">
+                </div>
+                <div>
+                    <label for="facultyDesignation">Designation</label>
+                    <input type="text" name="facultyDesignation" id="facultyDesignation" placeholder="Designation">
+                </div>
+                <div>
+                    <label for="facultyStatus">Status</label>
+                    <input type="text" name="facultyStatus" id="facultyStatus" placeholder="Status">
+                </div>
+                <div>
+                    <label for="facultyCourseName">Course</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select name="facultyCourseName" id="facultyCourseName" style="flex: 1;" onchange="syncCourseID()">
+                            <option value="" selected>Select Course Name</option>
+                            <option value="course1">Course 1</option>
+                            <option value="course2">Course 2</option>
+                            <!-- Add more courses as needed -->
+                        </select>
+                        <select name="facultyCourseID" id="facultyCourseID" style="flex: 1;" onchange="syncCourseName()">
+                            <option value="" selected>Select Course ID</option>
+                            <option value="id1">ID 1</option>
+                            <option value="id2">ID 2</option>
+                            <!-- Add more course IDs as needed -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="facultyDepartmentID">Department ID</label>
+                    <input type="text" name="facultyDepartmentID" id="facultyDepartmentID" placeholder="Department ID">
+                </div>
+                
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" placeholder="Email">
+                </div>
+                <div>
+                    <label for="facultyPhone">Phone Number</label>
+                    <input type="text" name="phone" id="facultyPhone" placeholder="Phone Number">
+                </div>
+                <div>
+                    <button type="submit">Register as Faculty</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function toggleForm() {
+            var userType = document.getElementById('userType').value;
+            var studentForm = document.getElementById('studentForm');
+            var facultyForm = document.getElementById('facultyForm');
+            if (userType === 'student') {
+                studentForm.style.display = 'block';
+                facultyForm.style.display = 'none';
+            } else if (userType === 'faculty') {
+                studentForm.style.display = 'none';
+                facultyForm.style.display = 'block';
+            } else {
+                studentForm.style.display = 'none';
+                facultyForm.style.display = 'none';
+            }
+        }
+
+        function syncCourseID() {
+            var courseName = document.getElementById('facultyCourseName').value;
+            var courseID = document.getElementById('facultyCourseID');
+            if (courseName === 'course1') {
+                courseID.value = 'id1';
+            } else if (courseName === 'course2') {
+                courseID.value = 'id2';
+            } else {
+                courseID.value = '';
+            }
+        }
+
+        function syncCourseName() {
+            var courseID = document.getElementById('facultyCourseID').value;
+            var courseName = document.getElementById('facultyCourseName');
+            if (courseID === 'id1') {
+                courseName.value = 'course1';
+            } else if (courseID === 'id2') {
+                courseName.value = 'course2';
+            } else {
+                courseName.value = '';
+            }
+        }
+    </script>
+</body>
+
+</html>

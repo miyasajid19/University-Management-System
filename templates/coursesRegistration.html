@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Management System - Course Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            display: inline;
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        main {
+            padding: 20px;
+            background-color: #fff;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        main h2 {
+            margin-top: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        form label {
+            margin: 10px 0 5px;
+        }
+
+        form input,
+        form select {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>University Management System</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Courses</a></li>
+                <li><a href="#">Registration</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>Course Registration</h2>
+        <form action="/submit_registration" method="post">
+
+            <label for="studentId">Student ID:</label>
+            <input type="text" id="studentId" name="studentId" required>
+
+            <label for="semester">Semester</label>
+            <select id="semester" name="semester" required onchange="updateCourses()">
+                <option value="">Select Semester</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+
+            <div id="courseOptions">
+                <!-- Course options will be dynamically inserted here -->
+            </div>
+
+            <label for="courseCode">Course Code:</label>
+            <input type="text" id="courseCode" name="courseCode" readonly>
+
+            <label for="credits">Credits:</label>
+            <input type="text" id="credits" name="credits" readonly>
+
+            <button type="submit">Register</button>
+        </form>
+    </main>
+    <footer>
+        &copy; 2025 University Management System
+    </footer>
+
+    <script>
+        const courses = {
+            "1": [
+                { code: "UCB008", name: "APPLIED CHEMISTRY", credits: 4.5 },
+                { code: "UTA003", name: "COMPUTER PROGRAMMING", credits: 4.0 },
+                { code: "UES013", name: "ELECTRICAL & ELECTRONICS ENGINEERING", credits: 4.5 },
+                { code: "UEN002", name: "ENERGY AND ENVIRONMENT", credits: 3.0 },
+                { code: "UMA010", name: "MATHEMATICS – I", credits: 3.5 },
+                { code: "UES009", name: "MECHANICS", credits: 2.5 }
+            ],
+            "2": [
+                { code: "UPH004", name: "APPLIED PHYSICS", credits: 4.5 },
+                { code: "UTA018", name: "OBJECT ORIENTED PROGRAMMING", credits: 4.0 },
+                { code: "UTA026", name: "MANUFACTURING PROCESS", credits: 3.0 },
+                { code: "UTA015", name: "ENGINEERING DRAWING", credits: 4.0 },
+                { code: "UHU003", name: "PROFESSIONAL COMMUNICATION", credits: 3.0 },
+                { code: "UMA004", name: "MATHEMATICS – II", credits: 3.5 }
+            ],
+            "3": [
+                { code: "UCS303", name: "OPERATING SYSTEMS", credits: 4.0 },
+                { code: "UCS405", name: "DISCRETE MATHEMATICAL STRUCTURES", credits: 3.5 },
+                { code: "UCS301", name: "DATA STRUCTURES", credits: 4.0 },
+                { code: "UCS510", name: "COMPUTER ARCHITECTURE AND ORGANIZATION", credits: 3.0 },
+                { code: "UMA011", name: "NUMERICAL ANALYSIS", credits: 4.0 }
+            ],
+            "4": [
+                { code: "UCS411", name: "ARTIFICIAL INTELLIGENCE", credits: 4.0 },
+                { code: "UCS415", name: "DESIGN AND ANALYSIS OF ALGORITHMS", credits: 4.0 },
+                { code: "UCS310", name: "DATABASE MANAGEMENT SYSTEMS", credits: 4.0 },
+                { code: "UCS503", name: "SOFTWARE ENGINEERING", credits: 4.0 },
+                { code: "UCS414", name: "COMPUTER NETWORKS", credits: 3.0 },
+                { code: "UMA035", name: "OPTIMIZATION TECHNIQUES", credits: 4.0 }
+            ],
+            "5": [
+                { code: "UML501", name: "MACHINE LEARNING", credits: 4.0 },
+                { code: "UCS410", name: "PROBABILITY AND STATISTICS", credits: 4.0 },
+                { code: "UCS531", name: "Cloud Computing", credits: 3.0 },
+                { code: "UCS413", name: "NETWORK PROGRAMMING", credits: 3.0 },
+                { code: "ELECTIVE-I", name: "Elective I", credits: 3.0 },
+                { code: "GENERIC ELECTIVE", name: "Generic Elective", credits: 2.0 }
+            ],
+            "6": [
+                { code: "UCS701", name: "THEORY OF COMPUTATION", credits: 3.5 },
+                { code: "UCS505", name: "COMPUTER GRAPHICS", credits: 4.0 },
+                { code: "UCS619", name: "QUANTUM COMPUTING", credits: 4.0 },
+                { code: "ELECTIVE-II", name: "Elective II", credits: 3.0 },
+                { code: "ELECTIVE-III", name: "Elective III", credits: 3.0 },
+                { code: "UCS797", name: "CAPSTONE PROJECT", credits: 0 }
+            ],
+            "7": [
+                { code: "UCS802", name: "COMPILER CONSTRUCTION", credits: 4.0 },
+                { code: "UHU005", name: "HUMANITIES FOR ENGINEERS", credits: 3.0 },
+                { code: "UCS712", name: "COGNITIVE COMPUTING", credits: 2.0 },
+                { code: "ELECTIVE-IV", name: "Elective IV", credits: 3.0 },
+                { code: "UCS797", name: "CAPSTONE PROJECT", credits: 8.0 }
+            ],
+            "8": [
+                { code: "UCS898", name: "PROJECT SEMESTER", credits: 15.0 },
+                { code: "UCS813", name: "SOCIAL NETWORK ANALYSIS", credits: 3.0 },
+                { code: "UCS806", name: "ETHICAL HACKING", credits: 4.0 },
+                { code: "UCS899", name: "PROJECT", credits: 8.0 }
+            ]
+        };
+
+        function updateCourses() {
+            const semester = document.getElementById('semester').value;
+            const courseOptions = document.getElementById('courseOptions');
+            courseOptions.innerHTML = '';
+
+            if (courses[semester]) {
+                courses[semester].forEach(course => {
+                    const courseDiv = document.createElement('div');
+                    courseDiv.innerHTML = `
+                        <input type="checkbox" id="${course.code}" name="course" value="${course.code}" onclick="selectCourse('${course.code}', ${course.credits}, this)">
+                        <label for="${course.code}">${course.name}</label>
+                    `;
+                    courseOptions.appendChild(courseDiv);
+                });
+            }
+        }
+
+        function selectCourse(courseCode, credits, checkbox) {
+            let courseCodeField = document.getElementById('courseCode');
+            let creditsField = document.getElementById('credits');
+
+            let courseCodes = courseCodeField.value ? courseCodeField.value.split(',') : [];
+            let creditValues = creditsField.value ? creditsField.value.split(',') : [];
+
+            if (checkbox.checked) {
+                courseCodes.push(courseCode);
+                creditValues.push(credits);
+            } else {
+                courseCodes = courseCodes.filter(code => code !== courseCode);
+                creditValues = creditValues.filter(credit => credit !== credits.toString());
+            }
+
+            courseCodeField.value = courseCodes.join(',');
+            creditsField.value = creditValues.join(',');
+        }
+    </script>
+</body>
+
+</html>
