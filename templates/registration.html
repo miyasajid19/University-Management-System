@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/nav_style.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='css/register_style.css')}}">
     <style>
-        
+
     </style>
     <title>UMS | Home</title>
 </head>
@@ -26,14 +26,15 @@
     <div class="registration">
         <div>
             <label for="userType">Select User Type</label>
-            <select id="userType" onchange="toggleForm()">
-                <option value="" selected>Select User Type</option>
+            <select name="userType" id="userType" onchange="toggleForm()">
+                <option value="" disabled selected>Select User Type</option>
                 <option value="student">Student</option>
                 <option value="faculty">Faculty</option>
             </select>
         </div>
         <div id="studentForm" style="display: none;">
             <form action="/register" method="POST">
+                <input type="hidden" name="userType" id="studentUserType" value="">
                 <div>
                     <label for="firstname">Name</label>
                     <div>
@@ -43,22 +44,30 @@
                     </div>
                 </div>
                 <div>
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="studentEmail" placeholder="Email">
-                </div>
-                <div>
                     <label for="dob">Date of Birth</label>
                     <input type="date" name="dob" id="dob">
                 </div>
                 <div>
+                    <label for="gender">Gender</label>
+                    <select id="gender">
+                        <option value="" selected>Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <div>
                     <label for="address">Address</label>
                     <div>
-
                         <input type="text" name="street" id="street" placeholder="Street">
                         <input type="text" name="district" id="district" placeholder="district">
                         <input type="text" name="state" id="state" placeholder="State">
                         <input type="text" name="country" id="country" placeholder="Country">
                     </div>
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="studentEmail" placeholder="Email">
                 </div>
                 <div>
                     <label for="phone">Phone Number</label>
@@ -71,6 +80,7 @@
         </div>
         <div id="facultyForm" style="display: none;">
             <form action="/register" method="POST">
+                <input type="hidden" name="userType" id="facultyUserType" value="">
                 <div>
                     <label for="name">Name</label>
                     <div>
@@ -112,7 +122,6 @@
                     <label for="facultyDepartmentID">Department ID</label>
                     <input type="text" name="facultyDepartmentID" id="facultyDepartmentID" placeholder="Department ID">
                 </div>
-                
                 <div>
                     <label for="email">Email</label>
                     <input type="email" name="email" id="email" placeholder="Email">
@@ -132,15 +141,21 @@
             var userType = document.getElementById('userType').value;
             var studentForm = document.getElementById('studentForm');
             var facultyForm = document.getElementById('facultyForm');
+            var studentUserType = document.getElementById('studentUserType');
+            var facultyUserType = document.getElementById('facultyUserType');
             if (userType === 'student') {
                 studentForm.style.display = 'block';
                 facultyForm.style.display = 'none';
+                studentUserType.value = 'student';
             } else if (userType === 'faculty') {
                 studentForm.style.display = 'none';
                 facultyForm.style.display = 'block';
+                facultyUserType.value = 'faculty';
             } else {
                 studentForm.style.display = 'none';
                 facultyForm.style.display = 'none';
+                studentUserType.value = '';
+                facultyUserType.value = '';
             }
         }
 
