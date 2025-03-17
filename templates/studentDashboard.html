@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }} | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+    <style>
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/student/dashboard" class="active">Dashboard</a></li>
+            <li><a href="/student/courses">Courses</a></li>
+            <li><a href="/student/results">Results</a></li>
+            <li><a href="/student/fees">Fees</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    {{session.user}}
+    <main>
+        <h1>Welcome, {{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }}</h1>
+        <p>Your student ID is: {{ session.user[0] }}</p>
+        <p>Your email is: {{ session.user[4] }}</p>
+
+        <h2>Upcoming Exams</h2>
+        <ul>
+            <li>Mathematics - 15th March 2021</li>
+            <li>Physics - 18th March 2021</li>
+            <li>Chemistry - 22nd March 2021</li>
+        </ul>
+
+        <h2>Important Dates</h2>
+        <ul>
+            <li>Fee Payment Deadline - 10th March 2021</li>
+            <li>Course Registration Deadline - 12th March 2021</li>
+            <li>Exam Schedule Release - 5th March 2021</li>
+        </ul>
+    </main>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+    </footer>
+</body>
+</html>
