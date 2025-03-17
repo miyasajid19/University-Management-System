@@ -113,18 +113,18 @@
                     <label for="facultyDepartmentName">Department</label>
                     <div style="display: flex; gap: 10px;">
                         <select name="facultyDepartmentName" id="facultyDepartmentName" style="flex: 1;"
-                            onchange="syncDepartmentID()">  
+                            onchange="syncDepartmentID()">
                             <option value="" selected disabled>Select Department Name</option>
-                            <option value="department1">Department 1</option>
-                            <option value="department2">Department 2</option>
-                            <!-- Add more departments as needed -->
+                            {%for department in departments %}
+                            <option value="{{department[0]}}">{{department[0]}}</option>
+                            {%endfor%}
                         </select>
                         <select name="facultyDepartmentID" id="facultyDepartmentID" style="flex: 1;"
                             onchange="syncDepartmentName()">
                             <option value="" selected disabled>Select Department ID</option>
-                            <option value="dept1">Dept 1</option>
-                            <option value="dept2">Dept 2</option>
-                            <!-- Add more department IDs as needed -->
+                            {%for department in departments %}
+                            <option value="{{department[1]}}">{{department[1]}}</option>
+                            {%endfor%}
                         </select>
                     </div>
                 </div>
@@ -180,44 +180,39 @@
             if (courseName === '{{course[0]}}') {
                 courseID.value = '{{course[1]}}';
             }
-            {%endfor%}
+            {% endfor %}
         }
 
         function syncCourseName() {
             var courseID = document.getElementById('facultyCourseID').value;
             var courseName = document.getElementById('facultyCourseName');
-            if (courseID === 'id1') {
-                courseName.value = 'course1';
-            } else if (courseID === 'id2') {
-                courseName.value = 'course2';
-            } else {
-                courseName.value = '';
+            {%for course in courses %}
+            if (courseID === '{{course[1]}}') {
+                courseName.value = '{{course[0]}}';
             }
+            {% endfor %}
         }
 
         function syncDepartmentID() {
             var departmentName = document.getElementById('facultyDepartmentName').value;
             var departmentID = document.getElementById('facultyDepartmentID');
-            if (departmentName === 'department1') {
-                departmentID.value = 'dept1';
-            } else if (departmentName === 'department2') {
-                departmentID.value = 'dept2';
-            } else {
-                departmentID.value = '';
+            {%for department in departments %}
+            if (departmentName === '{{department[0]}}') {
+                departmentID.value = '{{department[1]}}';
             }
+            {% endfor %}
         }
 
         function syncDepartmentName() {
             var departmentID = document.getElementById('facultyDepartmentID').value;
             var departmentName = document.getElementById('facultyDepartmentName');
-            if (departmentID === 'dept1') {
-                departmentName.value = 'department1';
-            } else if (departmentID === 'dept2') {
-                departmentName.value = 'department2';
-            } else {
-                departmentName.value = '';
+            {%for department in departments %}
+            if (departmentID === '{{department[1]}}') {
+                departmentName.value = '{{department[0]}}';
             }
+            {% endfor %}
         }
+
     </script>
 </body>
 

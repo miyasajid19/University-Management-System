@@ -45,7 +45,10 @@ def getFacultyCourses():
     mycursor.execute("SELECT  Course_Name,Course_Code FROM courses")
     courses = mycursor.fetchall()
     return courses
-
+def getFacultyDepartments():
+    mycursor.execute("SELECT  Department_Name,Department_Abbreviations FROM department")
+    departments = mycursor.fetchall()
+    return departments
 @app.route('/')
 def main():
     return render_template('index.html')
@@ -90,13 +93,13 @@ def register():
         mydb.commit()
         print(request.form)
         return f"Form has been submitted. Admin will verify your details and send you an email.<br>"
-    return render_template('register.html')
+    return render_template('registeration.html')
 
 @app.route('/signin')
 def login():
     courses={"courses":getFacultyCourses()}
-
-    return render_template('registration.html',**courses)
+    departments={"departments":getFacultyDepartments()}
+    return render_template('registration.html',**courses,**departments)
 if __name__ == '__main__':
 
     app.run(debug=True)
