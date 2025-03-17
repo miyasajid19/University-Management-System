@@ -85,8 +85,8 @@ def register():
             facultyDepartmentID=request.form.get('facultyDepartmentID').strip().lower()
             facultyDesignation=request.form.get('Designation').strip().lower()
             mail, password, result = generateIDPass('faculty', FirstName, LastName)
-            query = "INSERT INTO `faculty`(`Faculty_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Date_of_Joining`, `Designation`, `Course_ID`, `Department_ID`, `official_mail`, `mail`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-            values = (result, FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, facultyCourseID, facultyDepartmentID, mail, email)
+            query = "INSERT INTO `faculty`(`Faculty_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Date_of_Joining`, `Designation`, `Course_ID`, `Department_ID`, `official_mail`, `mail`,`password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            values = (result, FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, facultyCourseID, facultyDepartmentID, mail, email,password)
             print(query,values)
             mycursor.execute(query, values)
             for phone in phones:
@@ -98,9 +98,40 @@ def register():
         return f"Form has been submitted. Admin will verify your details and send you an email.<br>"
     return render_template('registeration.html')
 
+@app.route('/signup')
+def signup():
+    return render_template('registration.html',**courses,**departments)
+
+@app.route('/login_user', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        email = request.form.get('email').lower().strip()
+        password = request.form.get('password').strip()
+        userType = request.form.get('user-type')
+        if userType == 'student':
+            mycursor.execute("SELECT * FROM students WHERE College_Email=%s AND Password=%s", (email, password))
+            user = mycursor.fetchone()
+            if user:
+                return "<h1>student login page</h1>"
+        elif userType == 'faculty':
+            mycursor.execute("SELECT * FROM faculty WHERE official_mail=%s AND Password=%s", (email, password))
+            user = mycursor.fetchone()
+            if user:
+                return "<h1>Faculty login page</h1>"
+                return redirect(url_for('faculty'))
+        elif userType == 'admin':
+            mycursor.execute("SELECT * FROM admin WHERE Email=%s AND Password=%s", (email, password))
+            user = mycursor.fetchone()
+            if user:
+                return "<h1>Admin login page</h1>"
+                return redirect(url_for('admin'))
+        else:
+            return "Invalid User Type"
+    return render_template('signin.html')
+
 @app.route('/signin')
 def login():
-    return render_template('registration.html',**courses,**departments)
+    return render_template('signin.html',**courses,**departments)
 if __name__ == '__main__':
 
     app.run(debug=True)
