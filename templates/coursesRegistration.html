@@ -24,19 +24,36 @@
             margin: 0;
         }
 
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
         nav ul {
             list-style: none;
             padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
         }
 
         nav ul li {
-            display: inline;
-            margin: 0 10px;
+            margin: 0 15px;
         }
 
         nav ul li a {
             color: #fff;
             text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
         }
 
         main {
@@ -95,17 +112,19 @@
 
 <body>
     <header>
-        <h1>University Management System</h1>
         <nav>
             <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Courses</a></li>
-                <li><a href="#">Registration</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="/">UMS</a></li>
+                <li><a href="/student/dashboard" class="active">Dashboard</a></li>
+                <li><a href="/student/courses">Courses</a></li>
+                <li><a href="/student/results">Results</a></li>
+                <li><a href="/student/fees">Fees</a></li>
+                <li><a href="/logout">Logout</a></li>
             </ul>
         </nav>
     </header>
     <main>
+        {{courses[0]}}
         <h2>Course Registration</h2>
         <form action="/submit_registration" method="post">
 
@@ -141,70 +160,9 @@
     <footer>
         &copy; 2025 University Management System
     </footer>
-
     <script>
-        const courses = {
-            "1": [
-                { code: "UCB008", name: "APPLIED CHEMISTRY", credits: 4.5 },
-                { code: "UTA003", name: "COMPUTER PROGRAMMING", credits: 4.0 },
-                { code: "UES013", name: "ELECTRICAL & ELECTRONICS ENGINEERING", credits: 4.5 },
-                { code: "UEN002", name: "ENERGY AND ENVIRONMENT", credits: 3.0 },
-                { code: "UMA010", name: "MATHEMATICS – I", credits: 3.5 },
-                { code: "UES009", name: "MECHANICS", credits: 2.5 }
-            ],
-            "2": [
-                { code: "UPH004", name: "APPLIED PHYSICS", credits: 4.5 },
-                { code: "UTA018", name: "OBJECT ORIENTED PROGRAMMING", credits: 4.0 },
-                { code: "UTA026", name: "MANUFACTURING PROCESS", credits: 3.0 },
-                { code: "UTA015", name: "ENGINEERING DRAWING", credits: 4.0 },
-                { code: "UHU003", name: "PROFESSIONAL COMMUNICATION", credits: 3.0 },
-                { code: "UMA004", name: "MATHEMATICS – II", credits: 3.5 }
-            ],
-            "3": [
-                { code: "UCS303", name: "OPERATING SYSTEMS", credits: 4.0 },
-                { code: "UCS405", name: "DISCRETE MATHEMATICAL STRUCTURES", credits: 3.5 },
-                { code: "UCS301", name: "DATA STRUCTURES", credits: 4.0 },
-                { code: "UCS510", name: "COMPUTER ARCHITECTURE AND ORGANIZATION", credits: 3.0 },
-                { code: "UMA011", name: "NUMERICAL ANALYSIS", credits: 4.0 }
-            ],
-            "4": [
-                { code: "UCS411", name: "ARTIFICIAL INTELLIGENCE", credits: 4.0 },
-                { code: "UCS415", name: "DESIGN AND ANALYSIS OF ALGORITHMS", credits: 4.0 },
-                { code: "UCS310", name: "DATABASE MANAGEMENT SYSTEMS", credits: 4.0 },
-                { code: "UCS503", name: "SOFTWARE ENGINEERING", credits: 4.0 },
-                { code: "UCS414", name: "COMPUTER NETWORKS", credits: 3.0 },
-                { code: "UMA035", name: "OPTIMIZATION TECHNIQUES", credits: 4.0 }
-            ],
-            "5": [
-                { code: "UML501", name: "MACHINE LEARNING", credits: 4.0 },
-                { code: "UCS410", name: "PROBABILITY AND STATISTICS", credits: 4.0 },
-                { code: "UCS531", name: "Cloud Computing", credits: 3.0 },
-                { code: "UCS413", name: "NETWORK PROGRAMMING", credits: 3.0 },
-                { code: "ELECTIVE-I", name: "Elective I", credits: 3.0 },
-                { code: "GENERIC ELECTIVE", name: "Generic Elective", credits: 2.0 }
-            ],
-            "6": [
-                { code: "UCS701", name: "THEORY OF COMPUTATION", credits: 3.5 },
-                { code: "UCS505", name: "COMPUTER GRAPHICS", credits: 4.0 },
-                { code: "UCS619", name: "QUANTUM COMPUTING", credits: 4.0 },
-                { code: "ELECTIVE-II", name: "Elective II", credits: 3.0 },
-                { code: "ELECTIVE-III", name: "Elective III", credits: 3.0 },
-                { code: "UCS797", name: "CAPSTONE PROJECT", credits: 0 }
-            ],
-            "7": [
-                { code: "UCS802", name: "COMPILER CONSTRUCTION", credits: 4.0 },
-                { code: "UHU005", name: "HUMANITIES FOR ENGINEERS", credits: 3.0 },
-                { code: "UCS712", name: "COGNITIVE COMPUTING", credits: 2.0 },
-                { code: "ELECTIVE-IV", name: "Elective IV", credits: 3.0 },
-                { code: "UCS797", name: "CAPSTONE PROJECT", credits: 8.0 }
-            ],
-            "8": [
-                { code: "UCS898", name: "PROJECT SEMESTER", credits: 15.0 },
-                { code: "UCS813", name: "SOCIAL NETWORK ANALYSIS", credits: 3.0 },
-                { code: "UCS806", name: "ETHICAL HACKING", credits: 4.0 },
-                { code: "UCS899", name: "PROJECT", credits: 8.0 }
-            ]
-        };
+        const courses = {{courses | tojson}};
+        console.log(courses);
 
         function updateCourses() {
             const semester = document.getElementById('semester').value;
