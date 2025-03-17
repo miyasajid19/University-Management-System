@@ -89,23 +89,23 @@
                         <input type="text" name="lastname" id="lastname" placeholder="Lastname">
                     </div>
                 </div>
-               
                 <div>
                     <label for="facultyCourseName">Course</label>
                     <div style="display: flex; gap: 10px;">
                         <select name="facultyCourseName" id="facultyCourseName" style="flex: 1;"
                             onchange="syncCourseID()">
                             <option value="" selected disabled>Select Course Name</option>
-                            <option value="course1">Course 1</option>
-                            <option value="course2">Course 2</option>
+                            {%for course in courses %}
+                            <option value="{{course[0]}}">{{course[0]}}</option>
+                            {%endfor%}
                             <!-- Add more courses as needed -->
                         </select>
                         <select name="facultyCourseID" id="facultyCourseID" style="flex: 1;"
                             onchange="syncCourseName()">
                             <option value="" selected disabled>Select Course ID</option>
-                            <option value="id1">ID 1</option>
-                            <option value="id2">ID 2</option>
-                            <!-- Add more course IDs as needed -->
+                            {%for course in courses %}
+                            <option value="{{course[1]}}">{{course[1]}}</option>
+                            {%endfor%}
                         </select>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                     <label for="facultyDepartmentName">Department</label>
                     <div style="display: flex; gap: 10px;">
                         <select name="facultyDepartmentName" id="facultyDepartmentName" style="flex: 1;"
-                            onchange="syncDepartmentID()">
+                            onchange="syncDepartmentID()">  
                             <option value="" selected disabled>Select Department Name</option>
                             <option value="department1">Department 1</option>
                             <option value="department2">Department 2</option>
@@ -176,13 +176,11 @@
         function syncCourseID() {
             var courseName = document.getElementById('facultyCourseName').value;
             var courseID = document.getElementById('facultyCourseID');
-            if (courseName === 'course1') {
-                courseID.value = 'id1';
-            } else if (courseName === 'course2') {
-                courseID.value = 'id2';
-            } else {
-                courseID.value = '';
+            {%for course in courses %}
+            if (courseName === '{{course[0]}}') {
+                courseID.value = '{{course[1]}}';
             }
+            {%endfor%}
         }
 
         function syncCourseName() {
