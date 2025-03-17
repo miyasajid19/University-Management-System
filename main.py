@@ -46,7 +46,7 @@ def getFacultyCourses():
     courses = mycursor.fetchall()
     return courses
 def getFacultyDepartments():
-    mycursor.execute("SELECT  Department_Name,Department_ID FROM department")
+    mycursor.execute("SELECT  Department_ID,Department_Name FROM department")
     departments = mycursor.fetchall()
     return departments
 courses={"courses":getFacultyCourses()}
@@ -57,55 +57,81 @@ def main():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        userType=request.form.get('userType')
+        userType = request.form.get('userType')
         FirstName = request.form.get('firstname').lower().strip()
         MiddleName = request.form.get('middlename').lower().strip()
         LastName = request.form.get('lastname').lower().strip()
         email = request.form.get('email').lower().strip()
         phones = request.form.get('phone').lower().strip().split(',')
-        print(phones)
-        if(userType=='student'):
-            DOB = request.form.get('dob')
-            gender = request.form.get('gender')
-            street = request.form.get('street').lower().strip()
-            district = request.form.get('district').lower().strip()
-            state = request.form.get('state').lower().strip()
-            country = request.form.get('country').lower().strip()
-            mail, password, result = generateIDPass('student', FirstName, LastName)
-            query = "INSERT INTO `students`(`Student_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Street`, `District`, `State`, `Country`, `Gender`, `Date_of_Birth`, `Email`, `College_Email`, `Password`, `Enrollment_Year`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            values = (result, FirstName, MiddleName, LastName, street, district, state, country, gender, DOB, email, mail, password, datetime.datetime.now().year)
-            mycursor.execute(query, values)
-            for phone in phones:
-                sql="INSERT INTO `student_phone_no`(`Student_ID`, `Phone`) VALUES (%s, %s)"
-                values=(result,phone)
-                mycursor.execute(sql,values)
+
+        if userType == 'student':
+            register_student(FirstName, MiddleName, LastName, email, phones, request.form)
         else:
-            Date_of_Joining = datetime.datetime.now().date().strftime('%Y-%m-%d')
-            facultyCourseID=request.form.get('facultyCourseID').strip().lower()
-            facultyDepartmentID=request.form.get('facultyDepartmentID').strip().lower()
-            facultyDesignation=request.form.get('Designation').strip().lower()
-            mail, password, result = generateIDPass('faculty', FirstName, LastName)
-            query = "INSERT INTO `faculty`(`Faculty_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Date_of_Joining`, `Designation`, `Course_ID`, `Department_ID`, `official_mail`, `mail`,`password`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-            values = (result, FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, facultyCourseID, facultyDepartmentID, mail, email,password)
-            print(query,values)
-            mycursor.execute(query, values)
-            for phone in phones:
-                sql="INSERT INTO `faculty_phone_no`(`Faculty_ID`, `Phone`) VALUES (%s, %s)"
-                values=(result,phone)
-                mycursor.execute(sql,values)
-        mydb.commit()
-        print(request.form)
-        return f"Form has been submitted. Admin will verify your details and send you an email.<br>"
-    return render_template('registeration.html')
+            register_faculty(FirstName, MiddleName, LastName, email, phones, request.form)
+
+        return "Form has been submitted. Admin will verify your details and send you an email.<br>"
+    return render_template('registration.html')
+
+def register_student(FirstName, MiddleName, LastName, email, phones, form):
+    DOB = form.get('dob')
+    gender = form.get('gender')
+    street = form.get('street').lower().strip()
+    district = form.get('district').lower().strip()
+    state = form.get('state').lower().strip()
+    country = form.get('country').lower().strip()
+    mail, password, result = generateIDPass('student', FirstName, LastName)
+    query = """
+        INSERT INTO students (Student_ID, First_Name, Middle_Name, Last_Name, Street, District, State, Country, Gender, Date_of_Birth, Email, College_Email, Password, Enrollment_Year)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    values = (result, FirstName, MiddleName, LastName, street, district, state, country, gender, DOB, email, mail, password, datetime.datetime.now().year)
+    mycursor.execute(query, values)
+    mydb.commit()
+    for phone in phones:
+        sql = "INSERT INTO student_phone_no (Student_ID, Phone) VALUES (%s, %s)"
+        values = (result, phone)
+        mycursor.execute(sql, values)
+    mydb.commit()
+
+def register_faculty(FirstName, MiddleName, LastName, email, phones, form):
+    Date_of_Joining = datetime.datetime.now().date().strftime('%Y-%m-%d')
+    facultyCourseID = form.get('facultyCourseID')
+    facultyCourseName = form.get('facultyCourseName').strip()
+    facultyDepartmentID = form.get('facultyDepartmentID')
+    facultyDesignation = form.get('Designation')
+    mail, password, result = generateIDPass('faculty', FirstName, LastName)
+    print("first name",FirstName)
+    print("middle name",MiddleName)
+    print("last name",LastName)
+    print("email",email)
+    print("phones",phones)
+    print("Date_of_Joining",Date_of_Joining)
+    print("facultyCourseID",facultyCourseID)
+    print("facultyCourseName",facultyCourseName)
+    print("facultyDepartmentID",facultyDepartmentID)
+    print("facultyDesignation",facultyDesignation)
+    print("mail",mail)
+    print("password",password)
+    print("result",result)
+    query = """ INSERT INTO `faculty`(`Faculty_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Date_of_Joining`,`Designation`,`mail`, `Official_Mail`, `Password`, `Course_ID`, `Department_ID`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+    values = (str(result), FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, email, mail, password, facultyCourseID, facultyDepartmentID)
+    mycursor.execute(query, values)
+    for phone in phones:
+        sql = "INSERT INTO faculty_phone_no (Faculty_ID, Phone) VALUES (%s, %s)"
+        values = (result, phone)
+        mycursor.execute(sql, values)
+    mydb.commit()
 
 @app.route('/signup')
 def signup():
     return render_template('registration.html',**courses,**departments)
 
-
+@app.route('/faculty/dashboard')
+def facultyDashboard():
+    return render_template('facultyDashboard.html')
 @app.route('/faculty')
 def faculty():
-    return render_template('facultyDashboard.html')
+    return redirect(url_for('facultyDashboard'))
 
 @app.route('/student')
 def student():
