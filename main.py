@@ -42,7 +42,7 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
     return mail, password, result
 
 def getFacultyCourses():
-    mycursor.execute("SELECT  Course_Name,Course_ID,Course_Code FROM courses")
+    mycursor.execute("SELECT  Course_ID,Course_Name FROM courses")
     courses = mycursor.fetchall()
     return courses
 def getFacultyDepartments():
@@ -102,6 +102,55 @@ def register():
 def signup():
     return render_template('registration.html',**courses,**departments)
 
+
+@app.route('/faculty')
+def faculty():
+    return render_template('facultyDashboard.html')
+
+@app.route('/student')
+def student():
+    return render_template('studentDashboard.html')
+
+@app.route('/student/register', methods=['GET', 'POST'])
+def course_register():
+    if request.method == 'POST':
+        student_id = request.form.get('studentId').strip()
+        course_codes = request.form.get('courseCode').strip().split(',')
+
+        mycursor.execute("SELECT Course_ID FROM enrollment WHERE Student_ID=%s", (student_id,))
+        registered_courses = [x[0] for x in mycursor.fetchall()]
+
+        new_course_codes = [code for code in course_codes if code not in registered_courses]
+        if not new_course_codes:
+            return "<script>alert('Already Registered for the course')</script>"
+
+        for course_code in new_course_codes:
+            mycursor.execute("SELECT Course_ID FROM courses WHERE Course_ID=%s", (course_code,))
+            course_id = mycursor.fetchone()[0]
+
+            query = "INSERT INTO `enrollment`(`Student_ID`, `Course_ID`, `Enrolled_IN`) VALUES (%s, %s, %s)"
+            values = (student_id, course_id, datetime.datetime.now().date())
+            mycursor.execute(query, values)
+        
+        mydb.commit()
+        return "Course Registered Successfully"
+    return render_template('studentDashboard.html')
+
+@app.route('/student/courses')
+def studentCourses():
+    query = "SELECT * FROM courses"
+    mycursor.execute(query)
+    courses = {}
+    for x in mycursor.fetchall():
+        if x[2] not in courses:
+            courses[x[2]] = []
+        courses[x[2]].append({
+            "code": x[0],
+            "name": x[1],
+            "credits": x[3]
+        })
+    return render_template('coursesRegistration.html', courses=courses)
+
 @app.route('/login_user', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -112,17 +161,20 @@ def signin():
             mycursor.execute("SELECT * FROM students WHERE College_Email=%s AND Password=%s", (email, password))
             user = mycursor.fetchone()
             if user:
-                return "<h1>student login page</h1>"
+                session['user'] = user
+                return redirect(url_for('student'))
         elif userType == 'faculty':
             mycursor.execute("SELECT * FROM faculty WHERE official_mail=%s AND Password=%s", (email, password))
             user = mycursor.fetchone()
             if user:
+                session['user'] = user
                 return "<h1>Faculty login page</h1>"
                 return redirect(url_for('faculty'))
         elif userType == 'admin':
             mycursor.execute("SELECT * FROM admin WHERE Email=%s AND Password=%s", (email, password))
             user = mycursor.fetchone()
             if user:
+                session['user'] = user
                 return "<h1>Admin login page</h1>"
                 return redirect(url_for('admin'))
         else:
