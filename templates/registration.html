@@ -49,7 +49,7 @@
                 </div>
                 <div>
                     <label for="gender">Gender</label>
-                    <select id="gender">
+                    <select name="gender">
                         <option value="" selected>Select gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
@@ -119,8 +119,21 @@
                     </div>
                 </div>
                 <div>
-                    <label for="facultyDepartmentID">Department ID</label>
-                    <input type="text" name="facultyDepartmentID" id="facultyDepartmentID" placeholder="Department ID">
+                    <label for="facultyDepartmentName">Department</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select name="facultyDepartmentName" id="facultyDepartmentName" style="flex: 1;" onchange="syncDepartmentID()">
+                            <option value="" selected>Select Department Name</option>
+                            <option value="department1">Department 1</option>
+                            <option value="department2">Department 2</option>
+                            <!-- Add more departments as needed -->
+                        </select>
+                        <select name="facultyDepartmentID" id="facultyDepartmentID" style="flex: 1;" onchange="syncDepartmentName()">
+                            <option value="" selected>Select Department ID</option>
+                            <option value="dept1">Dept 1</option>
+                            <option value="dept2">Dept 2</option>
+                            <!-- Add more department IDs as needed -->
+                        </select>
+                    </div>
                 </div>
                 <div>
                     <label for="email">Email</label>
@@ -158,16 +171,15 @@
                 facultyUserType.value = '';
             }
         }
-
         function syncCourseID() {
             var courseName = document.getElementById('facultyCourseName').value;
             var courseID = document.getElementById('facultyCourseID');
             if (courseName === 'course1') {
-                courseID.value = 'id1';
+            courseID.value = 'id1';
             } else if (courseName === 'course2') {
-                courseID.value = 'id2';
+            courseID.value = 'id2';
             } else {
-                courseID.value = '';
+            courseID.value = '';
             }
         }
 
@@ -175,11 +187,35 @@
             var courseID = document.getElementById('facultyCourseID').value;
             var courseName = document.getElementById('facultyCourseName');
             if (courseID === 'id1') {
-                courseName.value = 'course1';
+            courseName.value = 'course1';
             } else if (courseID === 'id2') {
-                courseName.value = 'course2';
+            courseName.value = 'course2';
             } else {
-                courseName.value = '';
+            courseName.value = '';
+            }
+        }
+
+        function syncDepartmentID() {
+            var departmentName = document.getElementById('facultyDepartmentName').value;
+            var departmentID = document.getElementById('facultyDepartmentID');
+            if (departmentName === 'department1') {
+            departmentID.value = 'dept1';
+            } else if (departmentName === 'department2') {
+            departmentID.value = 'dept2';
+            } else {
+            departmentID.value = '';
+            }
+        }
+
+        function syncDepartmentName() {
+            var departmentID = document.getElementById('facultyDepartmentID').value;
+            var departmentName = document.getElementById('facultyDepartmentName');
+            if (departmentID === 'dept1') {
+            departmentName.value = 'department1';
+            } else if (departmentID === 'dept2') {
+            departmentName.value = 'department2';
+            } else {
+            departmentName.value = '';
             }
         }
     </script>
