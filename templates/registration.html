@@ -89,29 +89,20 @@
                         <input type="text" name="lastname" id="lastname" placeholder="Lastname">
                     </div>
                 </div>
-                <div>
-                    <label for="facultyDOJ">Date of Joining</label>
-                    <input type="date" name="facultyDOJ" id="facultyDOJ">
-                </div>
-                <div>
-                    <label for="facultyDesignation">Designation</label>
-                    <input type="text" name="facultyDesignation" id="facultyDesignation" placeholder="Designation">
-                </div>
-                <div>
-                    <label for="facultyStatus">Status</label>
-                    <input type="text" name="facultyStatus" id="facultyStatus" placeholder="Status">
-                </div>
+               
                 <div>
                     <label for="facultyCourseName">Course</label>
                     <div style="display: flex; gap: 10px;">
-                        <select name="facultyCourseName" id="facultyCourseName" style="flex: 1;" onchange="syncCourseID()">
-                            <option value="" selected>Select Course Name</option>
+                        <select name="facultyCourseName" id="facultyCourseName" style="flex: 1;"
+                            onchange="syncCourseID()">
+                            <option value="" selected disabled>Select Course Name</option>
                             <option value="course1">Course 1</option>
                             <option value="course2">Course 2</option>
                             <!-- Add more courses as needed -->
                         </select>
-                        <select name="facultyCourseID" id="facultyCourseID" style="flex: 1;" onchange="syncCourseName()">
-                            <option value="" selected>Select Course ID</option>
+                        <select name="facultyCourseID" id="facultyCourseID" style="flex: 1;"
+                            onchange="syncCourseName()">
+                            <option value="" selected disabled>Select Course ID</option>
                             <option value="id1">ID 1</option>
                             <option value="id2">ID 2</option>
                             <!-- Add more course IDs as needed -->
@@ -121,14 +112,16 @@
                 <div>
                     <label for="facultyDepartmentName">Department</label>
                     <div style="display: flex; gap: 10px;">
-                        <select name="facultyDepartmentName" id="facultyDepartmentName" style="flex: 1;" onchange="syncDepartmentID()">
-                            <option value="" selected>Select Department Name</option>
+                        <select name="facultyDepartmentName" id="facultyDepartmentName" style="flex: 1;"
+                            onchange="syncDepartmentID()">
+                            <option value="" selected disabled>Select Department Name</option>
                             <option value="department1">Department 1</option>
                             <option value="department2">Department 2</option>
                             <!-- Add more departments as needed -->
                         </select>
-                        <select name="facultyDepartmentID" id="facultyDepartmentID" style="flex: 1;" onchange="syncDepartmentName()">
-                            <option value="" selected>Select Department ID</option>
+                        <select name="facultyDepartmentID" id="facultyDepartmentID" style="flex: 1;"
+                            onchange="syncDepartmentName()">
+                            <option value="" selected disabled>Select Department ID</option>
                             <option value="dept1">Dept 1</option>
                             <option value="dept2">Dept 2</option>
                             <!-- Add more department IDs as needed -->
@@ -142,6 +135,15 @@
                 <div>
                     <label for="facultyPhone">Phone Number</label>
                     <input type="text" name="phone" id="facultyPhone" placeholder="Phone Number">
+                </div>
+                <div>
+                    <label for="Designation">Designation</label>
+                    <select name="Designation" id="Designation">
+                        <option value="" selected disabled>Select</option>
+                        <option value="Professor">Professor</option>
+                        <option value="Teaching">Teaching Assistant</option>
+                        <option value="Lab Assistant">Lab Assistant</option>
+                    </select>
                 </div>
                 <div>
                     <button type="submit">Register as Faculty</button>
@@ -175,11 +177,11 @@
             var courseName = document.getElementById('facultyCourseName').value;
             var courseID = document.getElementById('facultyCourseID');
             if (courseName === 'course1') {
-            courseID.value = 'id1';
+                courseID.value = 'id1';
             } else if (courseName === 'course2') {
-            courseID.value = 'id2';
+                courseID.value = 'id2';
             } else {
-            courseID.value = '';
+                courseID.value = '';
             }
         }
 
@@ -187,11 +189,11 @@
             var courseID = document.getElementById('facultyCourseID').value;
             var courseName = document.getElementById('facultyCourseName');
             if (courseID === 'id1') {
-            courseName.value = 'course1';
+                courseName.value = 'course1';
             } else if (courseID === 'id2') {
-            courseName.value = 'course2';
+                courseName.value = 'course2';
             } else {
-            courseName.value = '';
+                courseName.value = '';
             }
         }
 
@@ -199,11 +201,11 @@
             var departmentName = document.getElementById('facultyDepartmentName').value;
             var departmentID = document.getElementById('facultyDepartmentID');
             if (departmentName === 'department1') {
-            departmentID.value = 'dept1';
+                departmentID.value = 'dept1';
             } else if (departmentName === 'department2') {
-            departmentID.value = 'dept2';
+                departmentID.value = 'dept2';
             } else {
-            departmentID.value = '';
+                departmentID.value = '';
             }
         }
 
@@ -211,11 +213,11 @@
             var departmentID = document.getElementById('facultyDepartmentID').value;
             var departmentName = document.getElementById('facultyDepartmentName');
             if (departmentID === 'dept1') {
-            departmentName.value = 'department1';
+                departmentName.value = 'department1';
             } else if (departmentID === 'dept2') {
-            departmentName.value = 'department2';
+                departmentName.value = 'department2';
             } else {
-            departmentName.value = '';
+                departmentName.value = '';
             }
         }
     </script>
