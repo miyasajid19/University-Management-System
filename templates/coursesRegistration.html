@@ -126,10 +126,10 @@
     <main>
         {{courses[0]}}
         <h2>Course Registration</h2>
-        <form action="/submit_registration" method="post">
+        <form action="/student/register" method="post">
 
             <label for="studentId">Student ID:</label>
-            <input type="text" id="studentId" name="studentId" required>
+            <input type="text" id="studentId" name="studentId" value="{{session.user[0]}}" readonly>
 
             <label for="semester">Semester</label>
             <select id="semester" name="semester" required onchange="updateCourses()">
