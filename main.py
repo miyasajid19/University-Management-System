@@ -42,13 +42,15 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
     return mail, password, result
 
 def getFacultyCourses():
-    mycursor.execute("SELECT  Course_Name,Course_Code FROM courses")
+    mycursor.execute("SELECT  Course_Name,Course_ID,Course_Code FROM courses")
     courses = mycursor.fetchall()
     return courses
 def getFacultyDepartments():
-    mycursor.execute("SELECT  Department_Name,Department_Abbreviations FROM department")
+    mycursor.execute("SELECT  Department_Name,Department_ID FROM department")
     departments = mycursor.fetchall()
     return departments
+courses={"courses":getFacultyCourses()}
+departments={"departments":getFacultyDepartments()}
 @app.route('/')
 def main():
     return render_template('index.html')
@@ -84,7 +86,8 @@ def register():
             facultyDesignation=request.form.get('Designation').strip().lower()
             mail, password, result = generateIDPass('faculty', FirstName, LastName)
             query = "INSERT INTO `faculty`(`Faculty_ID`, `First_Name`, `Middle_Name`, `Last_Name`, `Date_of_Joining`, `Designation`, `Course_ID`, `Department_ID`, `official_mail`, `mail`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-            values = (result, FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, facultyCourseID, facultyDepartmentID, email, mail)
+            values = (result, FirstName, MiddleName, LastName, Date_of_Joining, facultyDesignation, facultyCourseID, facultyDepartmentID, mail, email)
+            print(query,values)
             mycursor.execute(query, values)
             for phone in phones:
                 sql="INSERT INTO `faculty_phone_no`(`Faculty_ID`, `Phone`) VALUES (%s, %s)"
@@ -97,8 +100,6 @@ def register():
 
 @app.route('/signin')
 def login():
-    courses={"courses":getFacultyCourses()}
-    departments={"departments":getFacultyDepartments()}
     return render_template('registration.html',**courses,**departments)
 if __name__ == '__main__':
 
