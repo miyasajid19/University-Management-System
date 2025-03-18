@@ -229,12 +229,10 @@ def add():
     exam_duration=request.form.get('exam_duration')
     exam_type=request.form.get('exam_type')
     venue=request.form.get('venue')
-    
     query="INSERT INTO `exams`(`Course_ID`, `Exam_Date`, `Exam_Duration`, `Exam_Type`, `Venue`) VALUES (%s, %s, %s, %s, %s)"
     values=(course_id,exam_date,exam_duration,exam_type,venue)
-    mycursor.execute(query,values)
-
-    query="INSERT INTO takes_exams (Student_ID, Exam_ID) SELECT enrollment.Student_ID, exams.Exam_ID FROM enrollment INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID;"
+    mycursor.execute(query,values)    
+    query="INSERT IGNORE INTO takes_exams (Student_ID, Exam_ID) SELECT enrollment.Student_ID, exams.Exam_ID FROM enrollment INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID;"
     mycursor.execute(query)
     mydb.commit()
     return "Exam Added Successfully"
@@ -249,6 +247,141 @@ def facultyExams():
     recent_exams = mycursor.fetchall()
     return render_template('exams.html', upcoming_exams=upcoming_exams, recent_exams=recent_exams)
 
+@app.route('/faculty/results/<int:exam_id>/evaluate', methods=['GET', 'POST'])
+def evaluate(exam_id):
+    query = "SELECT Student_ID,concat(First_Name,' ',Middle_Name,' ',Last_Name) FROM students WHERE Student_ID in (SELECT takes_exams.Student_ID from takes_exams INNER JOIN exams on exams.Exam_ID=takes_exams.Exam_ID WHERE exams.Exam_ID=%s) AND Student_ID NOT IN (SELECT results.Student_ID from results INNER join exams on results.Exam_ID=exams.Exam_ID);"
+    mycursor.execute(query, (exam_id,))
+    students_to_be_evaluted = mycursor.fetchall()
+    query = "SELECT students.Student_ID, CONCAT(students.First_Name, ' ', students.Middle_Name, ' ', students.Last_Name) AS Full_Name, results.Marks_Obtained, results.Grade FROM students INNER JOIN results ON results.Student_ID = students.Student_ID WHERE students.Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.Exam_ID = %s ) AND students.Student_ID IN ( SELECT results.Student_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID );"
+    mycursor.execute(query, (exam_id,))
+    students_evaluted = mycursor.fetchall()
+    return render_template('result_evaluation.html', students_to_be_evaluted=students_to_be_evaluted, students_evaluted=students_evaluted, exam_id=exam_id)
+
+
+
+@app.route('/faculty/results/<int:exam_id>/evaluate/<int:student_id>', methods=['POST'])
+def evaluate_student(exam_id, student_id):
+    if (request.method=='POST'):
+        obtained_marks=request.form.get(f'obtained_marks_{student_id}')
+        print("obtained marks",obtained_marks)
+        # INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`)
+        query="SELECT Result_ID from results WHERE Exam_ID=%s AND Student_ID=%s"
+        mycursor.execute(query,(exam_id,student_id))
+        result=mycursor.fetchone()
+        if (result):
+            query="UPDATE results SET Marks_Obtained=%s WHERE Result_ID=%s"
+            values=(obtained_marks,result[0])
+            mycursor.execute(query,values)
+        else:
+            
+            query = "INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`) VALUES (%s, %s, %s, %s)"
+            values = (exam_id, student_id, session['user'][9], obtained_marks)
+            mycursor.execute(query, values)
+        mydb.commit()
+        return redirect(url_for('evaluate', exam_id=exam_id))
+    
+@app.route('/faculty/results/<int:exam_id>/evaluateall/<string:student_ids>', methods=['POST'])
+def evaluate_students(exam_id, student_ids):
+    student_ids = student_ids.split(',')
+    print(student_ids)
+    for student_id in student_ids:
+        print(student_id)
+        obtained_marks = request.form.get(f'obtained_marks_{student_id}')
+        if obtained_marks is None:
+            print("None detected")
+            continue
+        print("obtained marks",obtained_marks)
+        # INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`)
+        query="SELECT Result_ID from results WHERE Exam_ID=%s AND Student_ID=%s"
+        mycursor.execute(query,(exam_id,student_id))
+        result=mycursor.fetchone()
+        if (result):
+            query="UPDATE results SET Marks_Obtained=%s WHERE Result_ID=%s"
+            values=(obtained_marks,result[0])
+            mycursor.execute(query,values)
+        else:
+            
+            query = "INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`) VALUES (%s, %s, %s, %s)"
+            values = (exam_id, student_id, session['user'][9], obtained_marks)
+            mycursor.execute(query, values)
+        mydb.commit()
+    return redirect(url_for('evaluate', exam_id=exam_id))
+
+def calculate_percentile(data, percentile):
+    index = (percentile / 100) * (len(data) - 1)
+    lower = int(index)
+    upper = lower + 1
+    weight = index - lower
+    if upper < len(data):
+        return data[lower] * (1 - weight) + data[upper] * weight
+    else:
+        return data[lower]
+
+@app.route('/faculty/results/<int:exam_id>/grade/<string:student_ids>', methods=['POST'])
+def result_grade(exam_id, student_ids):
+    student_ids = student_ids.split(',')
+    query = "SELECT Marks_Obtained FROM results WHERE Exam_ID=%s"
+    mycursor.execute(query, (exam_id,))
+    obtained_marks = [float(mark[0]) for mark in mycursor.fetchall()]
+    obtained_marks.sort()
+
+    percentiles = {p: calculate_percentile(obtained_marks, p) for p in range(30, 100, 10)}
+    grade_map = {
+        90: 'A', 80: 'A-', 70: 'B', 60: 'B-', 50: 'C', 40: 'C-', 30: 'D', 0: 'E'
+    }
+
+    for student_id in student_ids:
+        obtained_marks = float(request.form.get(f'obtained_marks_{student_id}', 0))
+        grade = next(grade for p, grade in grade_map.items() if obtained_marks >= percentiles.get(p, 0))
+        
+        query = "UPDATE results SET Grade=%s WHERE Exam_ID=%s AND Student_ID=%s"
+        mycursor.execute(query, (grade, exam_id, student_id))
+    
+    mydb.commit()
+    return redirect(url_for('evaluate', exam_id=exam_id))
+
+
+@app.route('/faculty/results/<int:exam_id>/delete/<int:student_id>', methods=['POST'])
+def delete_student_result(exam_id, student_id):
+    if (request.method=='POST'):
+        obtained_marks=request.form.get(f'obtained_marks_{student_id}')
+        print("obtained marks",obtained_marks)
+        # INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`)
+        query="SELECT Result_ID from results WHERE Exam_ID=%s AND Student_ID=%s"
+        mycursor.execute(query,(exam_id,student_id))
+        result=mycursor.fetchone()
+        print(result)
+        if (result):
+            try:
+
+                query="DELETE FROM results WHERE Result_ID=%s"
+                values=(result[0],)
+                print(f"DELETE FROM results WHERE Result_ID={result[0]}")
+                mycursor.execute(query,values)
+                print("deleted")
+                mydb.commit()
+            except Exception as e:
+                print(e)
+        else:
+            return "Student not evaluated"
+        return redirect(url_for('evaluate', exam_id=exam_id))
+
+
+@app.route('/faculty/results')
+def facultyResults():
+    query = "SELECT * FROM exams WHERE Course_ID=%s and Status='Unevaluated';"
+    mycursor.execute(query, (session['user'][9],))
+    Exams_toEvaluate = mycursor.fetchall()
+
+    query = "SELECT * FROM exams WHERE Course_ID=%s and Status='Evaluated';"
+    mycursor.execute(query, (session['user'][9],))
+    Evaluated = mycursor.fetchall()
+
+    # query = "SELECT * FROM results WHERE Course_ID=%s';"
+    # mycursor.execute(query, (session['user'][9],))
+    # results = mycursor.fetchall()
+    print("i am here")
+    return render_template('results.html', results=None, Exams_toEvaluate=Exams_toEvaluate, Evaluated=Evaluated)
 
 @app.route('/student')
 def student():
