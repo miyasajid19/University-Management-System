@@ -98,7 +98,6 @@ def register():
         LastName = request.form.get('lastname').lower().strip()
         email = request.form.get('email').lower().strip()
         phones = request.form.get('phone').lower().strip().split(',')
-
         if userType == 'student':
             register_student(FirstName, MiddleName, LastName, email, phones, request.form)
         else:
@@ -298,6 +297,75 @@ def studentCourses():
         })
     return render_template('coursesRegistration.html', courses=courses)
 
+@app.route('/admin/approve_student/<int:student_id>', methods=['POST'])
+def approve_student(student_id):
+    query = "UPDATE students SET Status='enrolled' WHERE Student_ID=%s"
+    mycursor.execute(query, (student_id,))
+    mydb.commit()
+    return redirect(url_for('adminStudents'))
+
+@app.route('/admin/reject_student/<int:student_id>', methods=['POST'])
+def reject_student(student_id):
+    query = "DELETE FROM `students` WHERE Student_ID=%s"
+    mycursor.execute(query, (student_id,))
+    mydb.commit()
+    return redirect(url_for('adminStudents'))
+
+
+@app.route('/admin/students')
+def adminStudents():
+    query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year, Status FROM students;"
+    mycursor.execute(query)
+    students = mycursor.fetchall()
+    pending=list()
+    enrolled=list()
+    graduated=list()
+    restricated=list()
+    for student in students:
+        if student[-1].lower()=='pending':
+            pending.append(student)
+        elif student[-1].lower()=='graduated':
+            graduated.append(student)
+        elif student[-1].lower()=='restricted':
+            restricated.append(student)
+        else:
+            enrolled.append(student)
+        
+    return render_template('manage_students.html', pending=pending, enrolled=enrolled, graduated=graduated, restricated=restricated)
+
+@app.route('/admin/view_student/<int:student_id>', methods=['GET', 'POST'])
+def view_student(student_id):
+    query = "SELECT * FROM students WHERE Student_ID=%s"
+    mycursor.execute(query, (student_id,))
+    details={}
+    details["student"] = mycursor.fetchone()
+    query="select c.Course_ID,c.Course_Name,c.Credits,c.Semester,e.Enrolled_IN from courses c INNER JOIN enrollment e on e.Course_ID=c.Course_ID WHERE e.Student_ID=%s;"
+    mycursor.execute(query,(student_id,))
+    details["courses"]=mycursor.fetchall()
+    query="select Phone from student_phone_no where Student_ID=%s;"
+    mycursor.execute(query,(student_id,))
+    details["contacts"]=mycursor.fetchall()
+    return render_template('view_student.html', **details)
+
+
+@app.route('/admin/view_student/<int:student_id>/UnEnroll/<string:course_id>', methods=['POST'])
+def UnEnroll(student_id, course_id):
+    query = "DELETE FROM `enrollment` WHERE Student_ID=%s AND Course_ID=%s"
+    mycursor.execute(query, (student_id, course_id))
+    mydb.commit()
+    return redirect(url_for('view_student', student_id=student_id))
+
+@app.route('/admin/courses')
+def adminCourses():
+    query = "SELECT * FROM courses"
+    mycursor.execute(query)
+    courses = mycursor.fetchall()
+    return render_template('manage_courses.html', courses=courses)
+
+
+@app.route('/admin')
+def admin():
+    return render_template('adminDashboard.html')
 
 
 @app.route('/logout')
@@ -326,9 +394,9 @@ def signin():
         elif userType == 'admin':
             mycursor.execute("SELECT * FROM admin WHERE Email=%s AND Password=%s", (email, password))
             user = mycursor.fetchone()
+            print(user)
             if user:
                 session['user'] = user
-                return "<h1>Admin login page</h1>"
                 return redirect(url_for('admin'))
         else:
             return "Invalid User Type"
