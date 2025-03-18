@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }} | Faculty Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+    <style>
+        /* Existing styles */
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 1em;
+            text-align: left;
+        }
+
+        table thead tr {
+            background-color: #333;
+            color: #fff;
+        }
+
+        table th,
+        table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        /* New styles for the form */
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        form div {
+            margin-bottom: 15px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        form input,
+        form select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        form button {
+            padding: 10px 15px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/faculty/dashboard">Dashboard</a></li>
+            <li><a href="/faculty/exams" class="active">Exams</a></li>
+            <li><a href="/faculty/students">Students</a></li>
+            <li><a href="/faculty/reports">Reports</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    {{session.user}}
+    <main>
+        <form action="/faculty/exams/add" method="post">
+            <div>
+                <label for="course_id">Course ID</label>
+                <input type="text" id="course_id" name="course_id" value="{{session['user'][9]}}" readonly required>
+            </div>
+            <div>   
+                <label for="exam_date">Exam Date</label>
+                <input type="date" id="exam_date" name="exam_date" required>
+            </div>
+            <div>
+                <label for="exam_duration">Exam Duration (hours)</label>
+                <input type="number" step="0.1" id="exam_duration" name="exam_duration" required>
+            </div>
+            <div>
+                <label for="exam_type">Exam Type</label>
+                <select id="exam_type" name="exam_type" required>
+                    <option value="Mid Semester Test">Mid Semester Test</option>
+                    <option value="End Semester Test">End Semester Test</option>
+                    <option value="Quiz-1">Quiz-1</option>
+                    <option value="Quiz-2">Quiz-2</option>
+                    <option value="Lab Evaluation I">Lab Evaluation I</option>
+                    <option value="Lab Evaluation II">Lab Evaluation II</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+            <div>
+                <label for="venue">Venue</label>
+                <input type="text" id="venue" name="venue" required>
+            </div>
+            <button type="submit">Add Exam</button>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+    </footer>
+</body>
+
+</html>
