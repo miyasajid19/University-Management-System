@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ (session.user[1].upper()) }} | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+    <style>
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/students" class="active">Students</a></li>
+            <li><a href="/admin/courses">Courses</a></li>
+            <li><a href="/admin/exams">Exams</a></li>
+            <li><a href="/admin/fees">Fees</a></li>
+            <li><a href="/admin/departments">Departments</a></li>
+            <li><a href="/admin/results">Results</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    {{session.user}}
+    <main>
+        <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
+        <p>Your admin ID is: {{ session.user[0] }}</p>
+        <p>Your email is: {{ session.user[2] }}</p>
+        {{students}}
+        {% if pending %}
+        <h2>Pending Students</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Mail</th>
+                <th>Applied In</th>
+                <th>Expected Graduation</th>
+                <th>Action</th>
+            </tr>
+            {% for student in pending %}
+            <tr>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td>{{ student[5] }}</td>
+                <td>{{ student[6] }}</td>
+                <td>{{ student[7] }}</td>
+                <td>
+                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Approve</button>
+                    </form>
+                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if enrolled %}
+        <h2>Enrolled Students</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Mail</th>
+                <th>Applied In</th>
+                <th>Expected Graduation</th>
+                <th>Action</th>
+            </tr>
+            {% for student in enrolled %}
+            <tr>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td>{{ student[5] }}</td>
+                <td>{{ student[6] }}</td>
+                <td>{{ student[7] }}</td>
+                <td>
+                    <form action="/admin/view_student/{{ student[0]}}" method="post" style="display:inline;">
+                        <button type="submit">View</button>
+                    </form>
+                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Graduate</button>
+                    </form>
+                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Restrict</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if graduated %}
+        <h2>Graduated Students</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Mail</th>
+                <th>Applied In</th>
+                <th>Expected Graduation</th>
+                <th>Action</th>
+            </tr>
+            {% for student in graduated %}
+            <tr>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td>{{ student[5] }}</td>
+                <td>{{ student[6] }}</td>
+                <td>{{ student[7] }}</td>
+                <td>
+                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if restricted %}
+        <h2>Restricted Students</h2>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Mail</th>
+                <th>Applied In</th>
+                <th>Expected Graduation</th>
+                <th>Action</th>
+            </tr>
+            {% for student in restricted %}
+            <tr>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td>{{ student[5] }}</td>
+                <td>{{ student[6] }}</td>
+                <td>{{ student[7] }}</td>
+                <td>
+                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">view</button>
+                    </form>
+                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Remove Restriction</button>
+                    </form>
+                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}</form>
+    </main>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+    </footer>
+</body>
+
+</html>
