@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }} | Faculty Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+    <style>
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/faculty/dashboard">Dashboard</a></li>
+            <li><a href="/faculty/exams">Exams</a></li>
+            <li><a href="/faculty/students">Students</a></li>
+            <li><a href="/faculty/results" class="active">Results</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h1>Welcome to the Faculty Dashboard</h1>
+        <p>Here you can manage exams, students, and view reports.</p>
+        {{results}}
+        {{Evaluated}}
+        {{Exams_toEvaluate}}
+
+        {% if Exams_toEvaluate %}
+        <h2>Exams to Evaluate</h2>
+        <table>
+            <tr>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Exam Date</th>
+                <th>Exam Time</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+            {% for exam in Exams_toEvaluate %}
+            <tr>
+                <td>{{ exam[0] }}</td>
+                <td>{{ exam[1] }}</td>
+                <td>{{ exam[2] }}</td>
+                <td>{{ exam[3] }}</td>
+                <td>{{ exam[4] }}</td>
+                <td>{{ exam[5] }}</td>
+                <td><a href="/faculty/results/{{ exam[0] }}/evaluate">Evaluate</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if Evaluated %}
+        <h2>Evaluated Exams</h2>
+        <table>
+            <tr>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Exam Date</th>
+                <th>Exam Time</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+            {% for exam in Evaluated %}
+            <tr>
+                <td>{{ exam[0] }}</td>
+                <td>{{ exam[1] }}</td>
+                <td>{{ exam[2] }}</td>
+                <td>{{ exam[3] }}</td>
+                <td>{{ exam[4] }}</td>
+                <td>{{ exam[5] }}</td>
+                <td><a href="{{ url_for('view_results', exam_id=exam[0]) }}">View Results</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+        {% if results %}
+        <h2>Results</h2>
+        <table>
+            <tr>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Course Name</th>
+                <th>Grade</th>
+            </tr>
+            {% for result in results %}
+            <tr>
+                <td>{{ result[0] }}</td>
+                <td>{{ result[1] }}</td>
+                <td>{{ result[2] }}</td>
+                <td>{{ result[3] }}</td>
+                <td>{{ result[4] }}</td>
+                <td>{{ result[5] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+    </footer>
+</body>
+
+</html>
