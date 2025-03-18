@@ -362,7 +362,60 @@ def adminCourses():
     courses = mycursor.fetchall()
     return render_template('manage_courses.html', courses=courses)
 
+@app.route('/admin/courses/add_course', methods=['POST'])
+def add_course():
+    id = request.form.get('course_id')
+    name = request.form.get('course_name')
+    credits = request.form.get('credits')
+    semester = request.form.get('semester')
+    mycursor.execute("SELECT * FROM courses WHERE Course_ID=%s", (id,))
+    if mycursor.fetchone():
+        return "Course ID already exists"
+    query = "INSERT INTO `courses`(`Course_ID`, `Course_Name`, `Credits`, `Semester`) VALUES (%s, %s, %s, %s)"
+    values = (id, name, credits, semester)
+    mycursor.execute(query, values)
+    mydb.commit()
+    print("courses added")
+    return redirect(url_for('adminCourses'))
 
+@app.route('/admin/course/update/<string:course_id>', methods=['GET', 'POST'])
+def update_course(course_id):
+    new_course_id = request.form.get("course_id")
+    new_course_name = request.form.get("course_name")
+    new_course_credits = request.form.get("credits")
+    new_course_semester = request.form.get("semester")
+    print("new_course_id",new_course_id)
+    print("new_course_name",new_course_name)
+    print("new_course_credits",new_course_credits)
+    print("new_course_semester",new_course_semester)
+
+    print(new_course_id,course_id)
+    if(new_course_id!=course_id):
+        query="SELECT * FROM courses WHERE Course_ID=%s"
+        mycursor.execute(query,(new_course_id,))
+        course=mycursor.fetchone()
+        if course:
+            return "can't update course id as it already exists"
+        else:
+            query="UPDATE courses SET  Course_ID=%s,Course_Name=%s, Credits=%s, Semester=%s WHERE Course_ID=%s"
+            values=(new_course_id,new_course_name,new_course_credits,new_course_semester,course_id)
+            mycursor.execute(query,values)
+            mydb.commit()
+    else:
+        query="UPDATE courses SET  Course_Name=%s, Credits=%s, Semester=%s WHERE Course_ID=%s"
+        values=(new_course_name,float(new_course_credits),new_course_semester,course_id)
+        mycursor.execute(query,values)
+        mydb.commit()    
+    print("course updated")
+    return redirect(url_for('adminCourses'))
+        
+@app.route('/admin/course/delete/<string:course_id>', methods=['POST'])
+def delete_course(course_id):
+    print("course deleted")
+    query = "DELETE FROM `courses` WHERE Course_ID=%s"
+    mycursor.execute(query, (course_id,))
+    mydb.commit()
+    return redirect(url_for('adminCourses'))
 @app.route('/admin')
 def admin():
     return render_template('adminDashboard.html')
