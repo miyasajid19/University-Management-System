@@ -11,7 +11,14 @@ mydb = mysql.connector.connect(
     password="",
     database="University Management System"
 )
+
+
+
 mycursor = mydb.cursor()
+
+
+
+
 
 def generateIDPass(UserType,FirstName,LastName,digits=60):
     if UserType=='student':
@@ -41,19 +48,47 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
     password = FirstName[:3] + LastName[-3:] + str(result)[-2:] + '@tiet'
     return mail, password, result
 
+
+
+
+
+
+
+
+
 def getFacultyCourses():
     mycursor.execute("SELECT  Course_ID,Course_Name FROM courses")
     courses = mycursor.fetchall()
     return courses
+
+
+
 def getFacultyDepartments():
     mycursor.execute("SELECT  Department_ID,Department_Name FROM department")
     departments = mycursor.fetchall()
     return departments
+
+
+
+
 courses={"courses":getFacultyCourses()}
 departments={"departments":getFacultyDepartments()}
+
+
+
+
 @app.route('/')
 def main():
     return render_template('index.html')
+
+
+
+
+
+
+
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -71,6 +106,15 @@ def register():
 
         return "Form has been submitted. Admin will verify your details and send you an email.<br>"
     return render_template('registration.html')
+
+
+
+
+
+
+
+
+
 
 def register_student(FirstName, MiddleName, LastName, email, phones, form):
     DOB = form.get('dob')
@@ -92,6 +136,15 @@ def register_student(FirstName, MiddleName, LastName, email, phones, form):
         values = (result, phone)
         mycursor.execute(sql, values)
     mydb.commit()
+
+
+
+
+
+
+
+
+
 
 def register_faculty(FirstName, MiddleName, LastName, email, phones, form):
     Date_of_Joining = datetime.datetime.now().date().strftime('%Y-%m-%d')
@@ -122,20 +175,84 @@ def register_faculty(FirstName, MiddleName, LastName, email, phones, form):
         mycursor.execute(sql, values)
     mydb.commit()
 
+
+
+
+
+
+
+
+
+
 @app.route('/signup')
 def signup():
     return render_template('registration.html',**courses,**departments)
 
+
+
+
+
 @app.route('/faculty/dashboard')
 def facultyDashboard():
     return render_template('facultyDashboard.html')
+
+
+
+
+
 @app.route('/faculty')
 def faculty():
     return redirect(url_for('facultyDashboard'))
 
+
+@app.route('/faculty/students')
+def facultyStudents():
+    print(session['user'])
+    query = f"""
+        SELECT CONCAT(s.first_name, ' ', s.Middle_Name, ' ', s.Last_Name) AS Full_Name, 
+       c.Course_Name, 
+       e.Enrolled_IN 
+       FROM students s
+       JOIN enrollment e ON s.Student_ID = e.Student_ID
+       JOIN faculty f ON f.Course_ID = e.Course_ID
+       JOIN courses c ON c.Course_ID = e.Course_ID
+       WHERE f.Faculty_ID =  {session['user'][0]}
+"""
+    mycursor.execute(query)
+    students = mycursor.fetchall()
+    return render_template('students.html', students=students)
+
+
+@app.route('/faculty/exams/add', methods=['GET', 'POST'])
+def add():
+    course_id=request.form.get('course_id')
+    exam_date=request.form.get('exam_date')
+    exam_duration=request.form.get('exam_duration')
+    exam_type=request.form.get('exam_type')
+    venue=request.form.get('venue')
+    
+    query="INSERT INTO `exams`(`Course_ID`, `Exam_Date`, `Exam_Duration`, `Exam_Type`, `Venue`) VALUES (%s, %s, %s, %s, %s)"
+    values=(course_id,exam_date,exam_duration,exam_type,venue)
+    mycursor.execute(query,values)
+    mydb.commit()
+    return "Exam Added Successfully"
+
+@app.route('/faculty/exams')
+def facultyExams():
+    return render_template('exams.html')
+
+
+
 @app.route('/student')
 def student():
     return render_template('studentDashboard.html')
+
+
+
+
+
+
+
 
 @app.route('/student/register', methods=['GET', 'POST'])
 def course_register():
@@ -162,6 +279,10 @@ def course_register():
         return "Course Registered Successfully"
     return render_template('studentDashboard.html')
 
+
+
+
+
 @app.route('/student/courses')
 def studentCourses():
     query = "SELECT * FROM courses"
@@ -176,6 +297,13 @@ def studentCourses():
             "credits": x[3]
         })
     return render_template('coursesRegistration.html', courses=courses)
+
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('main'))    
 
 @app.route('/login_user', methods=['GET', 'POST'])
 def signin():
@@ -194,7 +322,6 @@ def signin():
             user = mycursor.fetchone()
             if user:
                 session['user'] = user
-                return "<h1>Faculty login page</h1>"
                 return redirect(url_for('faculty'))
         elif userType == 'admin':
             mycursor.execute("SELECT * FROM admin WHERE Email=%s AND Password=%s", (email, password))
@@ -207,9 +334,24 @@ def signin():
             return "Invalid User Type"
     return render_template('signin.html')
 
+
+
+
+
+
+
 @app.route('/signin')
 def login():
     return render_template('signin.html',**courses,**departments)
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
 
     app.run(debug=True)
