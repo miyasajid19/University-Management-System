@@ -340,6 +340,13 @@ def result_grade(exam_id, student_ids):
     mydb.commit()
     return redirect(url_for('evaluate', exam_id=exam_id))
 
+@app.route('/faculty/results/<int:exam_id>/lock', methods=['POST'])
+def lock(exam_id):
+    query = "UPDATE exams SET Status='Evaluated' WHERE Exam_ID=%s"
+    mycursor.execute(query, (exam_id,))
+    mydb.commit()
+    return redirect(url_for('facultyResults'))
+
 
 @app.route('/faculty/results/<int:exam_id>/delete/<int:student_id>', methods=['POST'])
 def delete_student_result(exam_id, student_id):
