@@ -36,27 +36,6 @@
         main {
             padding: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 1em;
-            text-align: left;
-        }
-        table thead tr {
-            background-color: #333;
-            color: #fff;
-        }
-        table th, table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-        }
-        table tbody tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        table tbody tr:hover {
-            background-color: #f1f1f1;
-        }
         footer {
             background-color: #333;
             color: #fff;
@@ -72,37 +51,16 @@
     <nav>
         <ul>
             <li><a href="/">UMS</a></li>
-            <li><a href="/faculty/dashboard" >Dashboard</a></li>
+            <li><a href="/faculty/dashboard">Dashboard</a></li>
             <li><a href="/faculty/exams">Exams</a></li>
-            <li><a href="/faculty/students" class="active">Students</a></li>
-            <li><a href="/faculty/results">Results</a></li>
+            <li><a href="/faculty/students">Students</a></li>
+            <li><a href="/faculty/results" class="active">Results</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
-        <table>
-            <thead>
-            <tr>
-                <th>S.No</th>
-                <th>Name</th>
-                <th>Course Name</th>
-                <th>Enrolled On</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% set count = 1 %}
-            {% for student in students %}
-            <tr>
-                <td>{{ count }}</td>
-                <td>{{ student[0] }}</td>
-                <td>{{ student[1] }}</td>
-                <td>{{ student[2] }}</td>
-                {% set count = count + 1 %}
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <h1>Welcome to the Faculty Dashboard</h1>
+        <p>Here you can manage exams, students, and view reports.</p>
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>

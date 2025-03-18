@@ -233,13 +233,21 @@ def add():
     query="INSERT INTO `exams`(`Course_ID`, `Exam_Date`, `Exam_Duration`, `Exam_Type`, `Venue`) VALUES (%s, %s, %s, %s, %s)"
     values=(course_id,exam_date,exam_duration,exam_type,venue)
     mycursor.execute(query,values)
+
+    query="INSERT INTO takes_exams (Student_ID, Exam_ID) SELECT enrollment.Student_ID, exams.Exam_ID FROM enrollment INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID;"
+    mycursor.execute(query)
     mydb.commit()
     return "Exam Added Successfully"
 
 @app.route('/faculty/exams')
 def facultyExams():
-    return render_template('exams.html')
-
+    query = "SELECT * FROM exams WHERE Exam_Date>=CURRENT_DATE AND Course_ID=%s;"
+    mycursor.execute(query, (session['user'][9],))
+    upcoming_exams = mycursor.fetchall()
+    query = "SELECT * FROM exams WHERE Exam_Date<CURRENT_DATE AND Course_ID=%s;"
+    mycursor.execute(query, (session['user'][9],))
+    recent_exams = mycursor.fetchall()
+    return render_template('exams.html', upcoming_exams=upcoming_exams, recent_exams=recent_exams)
 
 
 @app.route('/student')

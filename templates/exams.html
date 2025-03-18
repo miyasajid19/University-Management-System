@@ -129,18 +129,45 @@
             <li><a href="/faculty/dashboard">Dashboard</a></li>
             <li><a href="/faculty/exams" class="active">Exams</a></li>
             <li><a href="/faculty/students">Students</a></li>
-            <li><a href="/faculty/reports">Reports</a></li>
+            <li><a href="/faculty/results">Results</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
     {{session.user}}
     <main>
+        {{exams}}
+        {% if upcoming_exams %}
+        <h1>Upcoming Exams</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Exam Date</th>
+                    <th>Exam Duration</th>
+                    <th>Exam Type</th>
+                    <th>Venue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in upcoming_exams %}
+                <tr>
+                    <td>{{ exam[1] }}</td>
+                    <td>{{ exam[2] }}</td>
+                    <td>{{ exam[3] }} hours</td>
+                    <td>{{ exam[4] }}</td>
+                    <td>{{ exam[5] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        <h1>Schedule Exam</h1>
         <form action="/faculty/exams/add" method="post">
             <div>
                 <label for="course_id">Course ID</label>
                 <input type="text" id="course_id" name="course_id" value="{{session['user'][9]}}" readonly required>
             </div>
-            <div>   
+            <div>
                 <label for="exam_date">Exam Date</label>
                 <input type="date" id="exam_date" name="exam_date" required>
             </div>
@@ -151,6 +178,7 @@
             <div>
                 <label for="exam_type">Exam Type</label>
                 <select id="exam_type" name="exam_type" required>
+                    <option value="" selected disabled>Select</option>
                     <option value="Mid Semester Test">Mid Semester Test</option>
                     <option value="End Semester Test">End Semester Test</option>
                     <option value="Quiz-1">Quiz-1</option>
@@ -164,8 +192,34 @@
                 <label for="venue">Venue</label>
                 <input type="text" id="venue" name="venue" required>
             </div>
-            <button type="submit">Add Exam</button>
+            <button type="submit">Schedule</button>
         </form>
+
+        {% if  recent_exams %}
+        <h1>Recent Exams</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Exam Date</th>
+                    <th>Exam Duration</th>
+                    <th>Exam Type</th>
+                    <th>Venue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in recent_exams %}
+                <tr>
+                    <td>{{ exam[1] }}</td>
+                    <td>{{ exam[2] }}</td>
+                    <td>{{ exam[3] }} hours</td>
+                    <td>{{ exam[4] }}</td>
+                    <td>{{ exam[5] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
