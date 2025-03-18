@@ -193,14 +193,64 @@ def signup():
 
 @app.route('/faculty/dashboard')
 def facultyDashboard():
-    return render_template('facultyDashboard.html')
+    query="SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name,' ',faculty.Middle_Name,' ',faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, faculty.Password, courses.Course_Name ,department.Department_Name, department.Department_ID FROM faculty INNER JOIN   courses on courses.Course_ID = faculty.Course_ID INNER JOIN department on department.Department_ID =faculty.Department_ID WHERE faculty.Faculty_ID=%s;" 
+    mycursor.execute(query,(session['user'][0],))
+    faculty=mycursor.fetchall()[0]
+    query="select phone from faculty_phone_no where Faculty_ID=%s"
+    mycursor.execute(query,(session['user'][0],))
+    phones=mycursor.fetchall()
+    return render_template('facultyDashboard.html',faculty=faculty,phones=phones)
 
+
+@app.route('/faculty/update/<string:phones>', methods=['POST'])
+def update_faculty(phones):
+    if(request.method=='POST'):
+        Name=request.form.get('faculty_name')
+        names=Name.split(' ')
+
+        if(len(names)==1):
+            FirstName=names[0]
+            LastName=''
+            MiddleName=''
+        if(len(names)==2):
+            FirstName=names[0]
+            LastName=names[1]
+            MiddleName=''
+        else:
+            FirstName=names[0]
+            MiddleName=' '.join(names[1:-1])
+            LastName=names[-1]
+        phone_numbers = [phone[0] for phone in eval(phones)]
+        print(phone_numbers, type(phone_numbers), sep="\n\n\n")
+        for i in phone_numbers:
+            new_phone = request.form.get(f'faculty_phone_{i}')
+            if new_phone != i and new_phone:
+                query="UPDATE faculty_phone_no SET Phone=%s WHERE Phone=%s and Faculty_ID=%s"
+                values=(new_phone,i,session['user'][0])
+                mycursor.execute(query,values)
+                mydb.commit()
+            elif not new_phone:
+                query="DELETE FROM faculty_phone_no WHERE Phone=%s and Faculty_ID=%s"
+                values=(i,session['user'][0])
+                mycursor.execute(query,values)
+                mydb.commit()
+
+        personal_mail=request.form.get('faculty_personal_mail')
+        work_mail=request.form.get('faculty_work_mail')
+        password=request.form.get('faculty_password')
+        query="UPDATE faculty SET First_Name=%s, Middle_Name=%s, Last_Name=%s, Mail=%s, Official_Mail=%s, Password=%s WHERE Faculty_ID=%s"
+        values=(FirstName,MiddleName,LastName,personal_mail,work_mail,password,session['user'][0])
+        mycursor.execute(query,values)
+        mydb.commit()
+        return redirect(url_for('facultyDashboard'))
+    return render_template('facultyDashboard.html')
 
 
 
 
 @app.route('/faculty')
 def faculty():
+    
     return redirect(url_for('facultyDashboard'))
 
 
@@ -372,6 +422,17 @@ def delete_student_result(exam_id, student_id):
         else:
             return "Student not evaluated"
         return redirect(url_for('evaluate', exam_id=exam_id))
+
+@app.route('/faculty/results/<int:exam_id>/view', methods=['GET', 'POST'])
+def view_results(exam_id):
+    query = "SELECT results.Result_ID,results.Student_ID,CONCAT(students.First_Name,' ',students.Middle_Name,' ',students.Last_Name) AS Name,results.Marks_Obtained,results.Grade from results INNER JOIN students ON results.Student_ID=students.Student_ID INNER JOIN courses on results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
+    mycursor.execute(query, (exam_id,))
+    results = mycursor.fetchall()
+    query="SELECT DISTINCT courses.Course_Name, courses.Credits FROM courses INNER JOIN results ON results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
+    mycursor.execute(query,(exam_id,))  
+    course=mycursor.fetchall()[0]
+    return render_template('view_result.html', results=results, exam_id=exam_id,course=course)
+
 
 
 @app.route('/faculty/results')
