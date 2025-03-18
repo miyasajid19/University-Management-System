@@ -72,10 +72,11 @@
             padding: 10px 0;
             background-color: #333;
             color: #fff;
-            position:relative;
+            position: relative;
             width: 100%;
             bottom: 0;
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -117,12 +118,14 @@
 <body>
     <nav>
         <ul>
-            <li><a href="/">UMS</a></li>
-            <li><a href="/student/dashboard">Dashboard</a></li>
-            <li><a href="/student/courses">Courses</a></li>
-            <li><a href="/student/results" class="active">Results</a></li>
-            <li><a href="/student/fees">Fees</a></li>
-            <li><a href="/logout">Logout</a></li>
+            <ul>
+                <li><a href="/">UMS</a></li>
+                <li><a href="/faculty/dashboard">Dashboard</a></li>
+                <li><a href="/faculty/exams">Exams</a></li>
+                <li><a href="/faculty/students">Students</a></li>
+                <li><a href="/faculty/results" class="active">Results</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
         </ul>
     </nav>
     <main>
@@ -210,9 +213,14 @@
                 {% set student_ids = student_ids.append( student[0]) %}
                 {% endfor %}
                 <tr>
-                    <td rowspan="5"><button type="submit"
+                    <td colspan="2"><button type="submit"
                             formaction="/faculty/results/{{exam_id}}/grade/{{ student_ids | join(',') }}"
-                            formmethod="post">Upload Grade</button></td>
+                            formmethod="post">Upload Grade</button>
+                    </td>
+                    <td colspan="2"><button type="submit"
+                            formaction="/faculty/results/{{exam_id}}/lock"
+                            formmethod="post">Lock</button>
+                    </td>
                 </tr>
             </tbody>
         </table>
