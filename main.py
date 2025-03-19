@@ -625,6 +625,56 @@ def delete_course(course_id):
     mycursor.execute(query, (course_id,))
     mydb.commit()
     return redirect(url_for('adminCourses'))
+
+@app.route('/admin/faculty')
+def adminFaculty():
+    query="SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name, ' ', COALESCE(faculty.Middle_Name, ''), ' ', faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, courses.Course_Name, department.Department_Name FROM faculty INNER JOIN courses ON courses.Course_ID = faculty.Course_ID INNER JOIN department ON department.Department_ID = faculty.Department_ID WHERE faculty.Status = 'Pending';"
+    mycursor.execute(query)
+    pending_faculty=mycursor.fetchall()
+    query="SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name, ' ', COALESCE(faculty.Middle_Name, ''), ' ', faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, courses.Course_Name, department.Department_Name FROM faculty INNER JOIN courses ON courses.Course_ID = faculty.Course_ID INNER JOIN department ON department.Department_ID = faculty.Department_ID WHERE faculty.Status = 'Active';"
+    mycursor.execute(query)
+    active_faculty=mycursor.fetchall()
+    return render_template('manage_faculty.html', pending=pending_faculty, active=active_faculty)
+
+
+@app.route('/admin/faculty/view_faculty/<int:faculty_id>', methods=[ 'POST'])
+def view_faculty(faculty_id):
+    query = "SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name,' ', faculty.Middle_Name, ' ', faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, faculty.Course_ID, courses.Course_Name,faculty.Department_ID,department.Department_Name,faculty.Status FROM faculty INNER JOIN courses ON courses.Course_ID =faculty.Course_ID INNER JOIN department ON department.Department_ID=faculty.Department_ID WHERE faculty.Faculty_ID=%s;"
+    mycursor.execute(query, (faculty_id,))
+    faculty = mycursor.fetchall()[0]
+    query = "SELECT Phone FROM faculty_phone_no WHERE Faculty_ID=%s"
+    mycursor.execute(query, (faculty_id,))
+    phones = mycursor.fetchall()
+    return render_template('view_faculty.html', faculty=faculty, phones=phones)
+
+
+@app.route('/admin/faculty/approve_faculty/<int:faculty_id>', methods=['POST'])
+def approve_faculty(faculty_id):
+    print("I am here")
+    query = "UPDATE faculty SET Status='Active' WHERE Faculty_ID=%s"
+    mycursor.execute(query, (faculty_id,))
+    mydb.commit()
+    return redirect(url_for('adminFaculty'))
+
+
+@app.route('/admin/faculty/reject_faculty/<int:faculty_id>', methods=['POST'])
+def reject_faculty(faculty_id):
+    query = "DELETE FROM faculty WHERE Faculty_ID=%s"
+    mycursor.execute(query, (faculty_id,))
+    mydb.commit()
+
+    return redirect(url_for('adminFaculty'))
+
+@app.route('/admin/faculty/delete_faculty/<int:faculty_id>', methods=['POST'])
+def delete_faculty(faculty_id):
+    query = "DELETE FROM faculty WHERE Faculty_ID=%s"
+    mycursor.execute(query, (faculty_id,))
+    mydb.commit()
+
+    return redirect(url_for('adminFaculty'))
+
+
+
 @app.route('/admin')
 def admin():
     return render_template('adminDashboard.html')
