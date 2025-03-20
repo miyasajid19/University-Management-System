@@ -428,6 +428,8 @@ def result_grade(exam_id, student_ids):
 def lock(exam_id):
     query = "UPDATE exams SET Status='Locked' WHERE Exam_ID=%s"
     mycursor.execute(query, (exam_id,))
+    query = "UPDATE results SET Status='Locked' WHERE Exam_ID=%s"
+    mycursor.execute(query, (exam_id,))
     mydb.commit()
     return redirect(url_for('facultyResults'))
 
@@ -623,6 +625,19 @@ def studentCourses():
             "credits": x[3]
         })
     return render_template('coursesRegistration.html', courses=courses)
+
+@app.route('/student/results')
+def studentResults():
+    query = "SELECT Results.Result_ID,results.Course_ID,courses.Course_Name,exams.Exam_Date,exams.Exam_Type,results.Marks_Obtained,results.Grade,results.Status FROM results INNER JOIN courses on courses.Course_ID=Results.Course_ID INNER JOIN exams ON exams.Exam_ID=results.Exam_ID WHERE Student_ID=%s AND results.Status='Unevaluated'"
+    mycursor.execute(query, (session['user'][0],))
+    Unevaluated_results = mycursor.fetchall()
+    query = "SELECT Results.Result_ID,results.Course_ID,courses.Course_Name,exams.Exam_Date,exams.Exam_Type,results.Marks_Obtained,results.Grade,results.Status FROM results INNER JOIN courses on courses.Course_ID=Results.Course_ID INNER JOIN exams ON exams.Exam_ID=results.Exam_ID WHERE Student_ID=%s AND results.Status='Evaluated'"
+    mycursor.execute(query, (session['user'][0],))
+    Evaluated_results = mycursor.fetchall()
+    query = "SELECT Results.Result_ID,results.Course_ID,courses.Course_Name,exams.Exam_Date,exams.Exam_Type,results.Marks_Obtained,results.Grade,results.Status FROM results INNER JOIN courses on courses.Course_ID=Results.Course_ID INNER JOIN exams ON exams.Exam_ID=results.Exam_ID WHERE Student_ID=%s AND results.Status='Locked'"
+    mycursor.execute(query, (session['user'][0],))
+    Locked_results = mycursor.fetchall()
+    return render_template('student_result.html', Unevaluated_results=Unevaluated_results, Evaluated_results=Evaluated_results, Locked_results=Locked_results)
 
 @app.route('/admin/approve_student/<int:student_id>', methods=['POST'])
 def approve_student(student_id):
