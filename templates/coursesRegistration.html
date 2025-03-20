@@ -115,8 +115,8 @@
         <nav>
             <ul>
                 <li><a href="/">UMS</a></li>
-                <li><a href="/student/dashboard" class="active">Dashboard</a></li>
-                <li><a href="/student/courses">Courses</a></li>
+                <li><a href="/student/dashboard">Dashboard</a></li>
+                <li><a href="/student/courses" class="active">Courses</a></li>
                 <li><a href="/student/results">Results</a></li>
                 <li><a href="/student/fees">Fees</a></li>
                 <li><a href="/logout">Logout</a></li>
@@ -161,7 +161,7 @@
         &copy; 2025 University Management System
     </footer>
     <script>
-        const courses = {{courses | tojson}};
+        const courses = {{ courses | tojson}};
         console.log(courses);
 
         function updateCourses() {
