@@ -494,10 +494,93 @@ def facultyResults():
     print("i am here")
     return render_template('results.html', Exams_toEvaluate=Exams_toEvaluate, Evaluated=Evaluated,Locked_Result=Locked_Result)
 
+@app.route('/student/dashboard')
 @app.route('/student')
 def student():
-    return render_template('studentDashboard.html')
+    query="SELECT `Student_ID`, CONCAT(`First_Name`, ' ', COALESCE(`Middle_Name`, ''), ' ', `Last_Name`) AS `Full_Name`, CONCAT( COALESCE(`Street`, ''), ', ', COALESCE(`District`, ''), ', ', COALESCE(`State`, ''), ', ', COALESCE(`Country`, '') ) AS `Full_Address`, `Gender`, `Date_of_Birth`, `Email`, `College_Email`, `Password`, `Enrollment_Year`, `Graduation_Year`, `Status` FROM `students` WHERE Student_ID=%s;"
+    mycursor.execute(query,(session['user'][0],))
+    student=mycursor.fetchall()[0]
+    query="SELECT Phone FROM student_phone_no WHERE Student_ID=%s;"
+    mycursor.execute(query,(session['user'][0],))
+    phones=mycursor.fetchall()
 
+    upcoming_exams_query = "SELECT courses.Course_Name,exams.Course_ID,exams.Exam_Type,exams.Exam_Duration,exams.Exam_Date,exams.Venue FROM exams INNER JOIN courses ON courses.Course_ID=exams.Course_ID WHERE exams.Exam_ID IN ( SELECT takes_exams.Exam_ID FROM takes_exams WHERE takes_exams.Student_ID = %s ) AND exams.Exam_Date >= CURRENT_DATE ORDER BY exams.Exam_Date ASC;"
+    mycursor.execute(upcoming_exams_query,(session['user'][0],))
+    upcoming_exams=mycursor.fetchall()
+
+    recent_exams_query = "SELECT courses.Course_Name,exams.Course_ID,exams.Exam_Type,exams.Exam_Duration,exams.Exam_Date,exams.Venue FROM exams INNER JOIN courses ON courses.Course_ID=exams.Course_ID WHERE exams.Exam_ID IN ( SELECT takes_exams.Exam_ID FROM takes_exams WHERE takes_exams.Student_ID = %s ) AND exams.Exam_Date < CURRENT_DATE ORDER BY exams.Exam_Date ASC;"
+    mycursor.execute(recent_exams_query,(session['user'][0],))
+    recent_exams=mycursor.fetchall()
+    
+    query="SELECT  courses.Course_Name,courses.Course_ID,exams.Exam_Type,exams.Exam_Duration,exams.Exam_Date,exams.Venue FROM exams INNER JOIN courses ON exams.Course_ID = courses.Course_ID WHERE exams.Exam_ID IN ( SELECT takes_exams.Exam_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID INNER JOIN takes_exams ON results.Exam_ID = takes_exams.Exam_ID WHERE results.Status = 'Locked' AND takes_exams.Student_ID = %s ) ORDER BY exams.Exam_Date ASC;"
+    mycursor.execute(query,(session['user'][0],))
+    locked_results=mycursor.fetchall()
+
+    
+    query="SELECT  courses.Course_Name,courses.Course_ID,exams.Exam_Type,exams.Exam_Duration,exams.Exam_Date,exams.Venue FROM exams INNER JOIN courses ON exams.Course_ID = courses.Course_ID WHERE exams.Exam_ID IN ( SELECT takes_exams.Exam_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID INNER JOIN takes_exams ON results.Exam_ID = takes_exams.Exam_ID WHERE results.Status = 'Evaluated' AND takes_exams.Student_ID = %s ) ORDER BY exams.Exam_Date ASC;"
+    mycursor.execute(query,(session['user'][0],))
+    evaluated_results=mycursor.fetchall()
+    session['phones']=phones
+    return render_template('studentDashboard.html',student=student,phones=phones,upcoming_exams=upcoming_exams,recent_exams=recent_exams,locked_results=locked_results,evaluated_results=evaluated_results)
+
+@app.route('/student/update/<int:student_id>/', methods=['POST'])
+def update_student(student_id):
+    if request.method == 'POST':
+        name=request.form.get('studentName')
+        names=name.split(' ')
+        if(len(names)==1):
+            FirstName=names[0]
+            LastName=''
+            MiddleName=''
+        elif(len(names)==2):
+            FirstName=names[0]
+            LastName=names[1]
+            MiddleName=''
+        else:
+            FirstName=names[0]
+            MiddleName=' '.join(names[1:-1])
+            LastName=names[-1]
+        
+        address=request.form.get('Address')
+        address_parts = address.split(',')
+        street = address_parts[0] if len(address_parts) > 0 else None
+        district = address_parts[1] if len(address_parts) > 1 else None
+        state = address_parts[2] if len(address_parts) > 2 else None
+        country = address_parts[3] if len(address_parts) > 3 else None
+        gender = request.form.get('gender')
+        dob=request.form.get('DOB')
+
+        email=request.form.get('studentEmail')
+        workMail=request.form.get('WorkMail')
+
+        password=request.form.get('password')
+
+        query = """
+            UPDATE students 
+            SET First_Name=%s, Middle_Name=%s, Last_Name=%s, Street=%s, District=%s, State=%s, Country=%s, Gender=%s, Date_of_Birth=%s, Email=%s, College_Email=%s, Password=%s 
+            WHERE Student_ID=%s
+        """
+        values = (FirstName, MiddleName, LastName, street, district, state, country, gender, dob, email, workMail, password, student_id)
+        mycursor.execute(query, values)
+        mydb.commit()
+        for i in session['phones']:
+            print(i,end="\n\n\n\n")
+            i=i[0]
+            print(i)
+            new_phone = request.form.get(f'phone_{i}')
+            if new_phone != i and new_phone:
+                query="UPDATE student_phone_no SET Phone=%s WHERE Phone=%s and Student_ID=%s"
+                print(f"UPDATE student_phone_no SET Phone={new_phone} WHERE Phone={i} and Student_ID={student_id}")
+                values=(new_phone,i,student_id)
+                mycursor.execute(query,values)
+                mydb.commit()
+            elif not new_phone:
+                query="DELETE FROM student_phone_no WHERE Phone=%s and Student_ID=%s"
+                print(f"DELETE FROM student_phone_no WHERE Phone={i} and Student_ID={student_id}")
+                values=(i,student_id)
+                mycursor.execute(query,values)
+                mydb.commit()
+        return redirect(url_for('student'))
 
 @app.route('/student/fees')
 def studentFees():
