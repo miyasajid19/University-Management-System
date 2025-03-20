@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             padding: 10px 0;
             text-align: center;
         }
+
         nav ul {
             list-style: none;
             padding: 0;
@@ -19,22 +21,127 @@
             display: flex;
             justify-content: center;
         }
+
         nav ul li {
             margin: 0 15px;
         }
+
         nav ul li a {
             color: #fff;
             text-decoration: none;
             padding: 10px 15px;
             transition: background-color 0.3s ease;
         }
+
         nav ul li a:hover,
         nav ul li a.active {
             background-color: #555;
             border-radius: 5px;
         }
+
+        body {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        form input,
+        select {
+            width: 90%;
+            padding: 5px;
+            margin: 5px 0;
+            border: 0px;
+        }
+
+        .checkbox {
+            width: 10%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .upcoming_exams,
+        .recent_exams,
+        .evaluated_results,
+        .locked_results {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .upcoming_exams {
+            border-color: #ff9800;
+        }
+
+        .recent_exams {
+            border-color: #2196F3;
+        }
+
+        .evaluated_results {
+            border-color: #9C27B0;
+        }
+
+        .locked_results {
+            border-color: #f44336;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
     </style>
 </head>
+
 <body>
     <nav>
         <ul>
@@ -46,28 +153,137 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
         <h1>Welcome, {{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }}</h1>
-        <p>Your student ID is: {{ session.user[0] }}</p>
-        <p>Your email is: {{ session.user[4] }}</p>
-
+        <h2>Student Details</h2>
+        <form action="/student/update/{{student[0]}}/" method="post">
+            <table>
+                <tr>
+                    <th>Student ID</th>
+                    <td><input type="text" name="studentId" value="{{student[0]}}" readonly></td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <td><input type="text" name="studentName" value="{{student[1]}}" placeholder="Enter Full Name "></td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td><input type="text" name="Address" value="{{student[2]}}"   placeholder="Address(Street,District,State,Country)"></td>
+                </tr>
+                <tr>
+                    <th>Gender</th>
+                    <td>
+                        <select name="gender" id="gender">
+                            <option value="" disabled>Select</option>
+                            <option value="Male" {% if student[3]=='Male' %} selected disabled{% endif %} >Male</option>
+                            <option value="Female" {% if student[3]=='Female' %} selected disabled{% endif %} >Female
+                            </option>
+                            <option value="Others" {% if student[3]=='Others' %} selected disabled{% endif %} >Others
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Date of Birth</th>
+                    <td><input type="date" name="DOB" value="{{student[4]}}"></td>
+                </tr>
+                <tr>
+                    <th>Phones</th>
+                    <td>
+                        {% for phone in phones %}
+                        <input type="text" name="phone_{{phone[0]}}" value="{{ phone[0] }}"><br>
+                        {% endfor %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Personal Email</th>
+                    <td><input type="email" name="studentEmail" value="{{student[5]}}"></td>
+                </tr>
+                <tr>
+                    <th>Work Mail</th>
+                    <td><input type="email" name="WorkMail"value="{{student[6]}}"></td>
+                </tr>
+                <tr>
+                    <th>Password</th>
+                    <td><input type="password" name="password" id="password" value="{{student[7]}}"><br>
+                        <input type="checkbox" class='checkbox' onclick="togglePassword()" style="margin-right: -10px;"> Show Password</input></td>
+                </tr>
+                <tr>
+                    <th>Enrollment Year</th>
+                    <td><input type="text" value="{{student[8]}}" readonly></td>
+                </tr>
+                <tr>
+                    <th>Graduation Year</th>
+                    <td><input type="text" value="{{student[9]}}" readonly></td>
+                </tr>
+            
+                <tr colspan="2">
+                    <td>
+                        <button type="submit">Update</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
         <h2>Upcoming Exams</h2>
         <ul>
-            <li>Mathematics - 15th March 2021</li>
-            <li>Physics - 18th March 2021</li>
-            <li>Chemistry - 22nd March 2021</li>
-        </ul>
+            {%for exam in upcoming_exams%}
+            <li class="upcoming_exams">The<b> {{exam[0]}} ({{exam[1]}})'s</b> exam, categorized as <b>{{exam[2]}}</b>,
+                is a
+                <b>{{exam[3]}}</b>-hour paper scheduled on <b>{{exam[4]}}</b>. It will take place at venue
+                <b>{{exam[5]}}</b>.
+            </li>
+            {%endfor%}
 
-        <h2>Important Dates</h2>
+        </ul>
+        <h2>Recent Exams</h2>
         <ul>
-            <li>Fee Payment Deadline - 10th March 2021</li>
-            <li>Course Registration Deadline - 12th March 2021</li>
-            <li>Exam Schedule Release - 5th March 2021</li>
+            {%for exam in recent_exams%}
+            <li class="recent_exams">The<b> {{exam[0]}} ({{exam[1]}})'s</b> exam, categorized as <b>{{exam[2]}}</b>, was
+                a
+                <b>{{exam[3]}}</b>-hour paper held on <b>{{exam[4]}}</b>. It took place at venue
+                <b>{{exam[5]}}</b>.
+            </li>
+            {%endfor%}
+
+        </ul>
+        <h2>Evaluated Results</h2>
+        <ul>
+
+            {%for exam in evaluated_results%}
+            <li class="evaluated_results">The<b> {{exam[0]}} ({{exam[1]}})'s</b> exam, categorized as
+                <b>{{exam[2]}}</b>, was a
+                <b>{{exam[3]}}</b>-hour paper held on <b>{{exam[4]}}</b>, at venue
+                <b>{{exam[5]}}</b> has been <b>evaluated</b>.
+            </li>
+            {%endfor%}
+
+        </ul>
+        <h2>Published Results</h2>
+        <ul>
+
+            {%for exam in locked_results%}
+            <li class="locked_results">The<b> {{exam[0]}} ({{exam[1]}})'s</b> exam, categorized as <b>{{exam[2]}}</b>,
+                was a
+                <b>{{exam[3]}}</b>-hour paper held on <b>{{exam[4]}}</b>, at venue
+                <b>{{exam[5]}}</b>. The result for this exam has been <b>published</b>.
+            </li>
+            {%endfor%}
+
         </ul>
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
     </footer>
 </body>
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+        } else {
+            passwordField.type = "password";
+        }
+    }
+</script>
+
 </html>
