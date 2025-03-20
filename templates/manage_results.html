@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ (session.user[1].upper()) }} | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+    <style>
+        nav {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/students">Students</a></li>
+            <li><a href="/admin/courses">Courses</a></li>
+            <li><a href="/admin/exams">Exams</a></li>
+            <li><a href="/admin/fees">Fees</a></li>
+            <li><a href="/admin/faculty">faculty</a></li>
+            <li><a href="/admin/departments">Departments</a></li>
+            <li><a href="/admin/results" class="active">Results</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    {{session.user}}
+    <main>
+        {% if Unevaluated_Result%}
+
+        <h1>Unevaluated Result</h1>
+        <table>
+            <tr>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Exam Date</th>
+                <th>Exam Duration</th>
+                <th>Exam Type</th>
+                <th>Venue</th>
+                <th>Course Name</th>
+                <th>Credits</th>
+                <th>Actions</th>
+            </tr>
+            {% for result in Unevaluated_Result %}
+            <tr>
+                <td>{{ result[0] }}</td>
+                <td>{{ result[1] }}</td>
+                <td>{{ result[2] }}</td>
+                <td>{{ result[3] }}</td>
+                <td>{{ result[4] }}</td>
+                <td>{{ result[5] }}</td>
+                <td>{{ result[7] }}</td>
+                <td>{{ result[8] }}</td>
+                <td>
+                    <a href="{{ url_for('delete_exam_admin', exam_id=result[0]) }}" class="btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {%endif%}
+
+        {% if Evautated_Result%}
+        <h1>Evaluated Exams</h1>
+        <table>
+            <tr>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Exam Date</th>
+                <th>Exam Duration</th>
+                <th>Exam Type</th>
+                <th>Venue</th>
+                <th>Course Name</th>
+                <th>Credits</th>
+                <th>Actions</th>
+            </tr>
+            {% for result in Evautated_Result %}
+            <tr>
+                <td>{{ result[0] }}</td>
+                <td>{{ result[1] }}</td>
+                <td>{{ result[2] }}</td>
+                <td>{{ result[3] }}</td>
+                <td>{{ result[4] }}</td>
+                <td>{{ result[5] }}</td>
+                <td>{{ result[7] }}</td>
+                <td>{{ result[8] }}</td>
+                <td>
+                    <a href="{{ url_for('view_results_admin', exam_id=result[0]) }}" class="btn-submit">view</a>
+                    <a href="{{ url_for('delete_exam_admin', exam_id=result[0]) }}" class="btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {%endif%}
+
+        {% if not Evautated_Result and not Unevautated_Result%}
+        <h1>No Results Found</h1>
+        {% endif %}
+    </main>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+    </footer>
+</body>
+
+</html>
