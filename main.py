@@ -25,7 +25,7 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
         mycursor.execute("SELECT MAX(Student_ID) FROM students")
         result = mycursor.fetchone()[0]
         if result is None:
-            result = 102367000
+            result = 102367001
         else:
             result =int(result)+ 1
         mail = FirstName[0] + LastName + str(digits)+'_be'+str(datetime.datetime.now().date().year)[-2:]+'@thapar.edu'
@@ -79,6 +79,7 @@ departments={"departments":getFacultyDepartments()}
 
 @app.route('/')
 def main():
+    session.clear()
     return render_template('index.html')
 
 
@@ -197,6 +198,8 @@ def signup():
 
 @app.route('/faculty/dashboard')
 def facultyDashboard():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query="SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name,' ',faculty.Middle_Name,' ',faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, faculty.Password, courses.Course_Name ,department.Department_Name, department.Department_ID FROM faculty INNER JOIN   courses on courses.Course_ID = faculty.Course_ID INNER JOIN department on department.Department_ID =faculty.Department_ID WHERE faculty.Faculty_ID=%s;" 
     mycursor.execute(query,(session['user'][0],))
     faculty=mycursor.fetchall()[0]
@@ -208,6 +211,8 @@ def facultyDashboard():
 
 @app.route('/faculty/update/<string:phones>', methods=['POST'])
 def update_faculty(phones):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if(request.method=='POST'):
         Name=request.form.get('faculty_name')
         names=Name.split(' ')
@@ -254,13 +259,15 @@ def update_faculty(phones):
 
 @app.route('/faculty')
 def faculty():
-    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     return redirect(url_for('facultyDashboard'))
 
 
 @app.route('/faculty/students')
 def facultyStudents():
-    print(session['user'])
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = f"""
         SELECT CONCAT(s.first_name, ' ', s.Middle_Name, ' ', s.Last_Name) AS Full_Name, 
        c.Course_Name, 
@@ -276,6 +283,8 @@ def facultyStudents():
     return render_template('students.html', students=students)
 @app.route('/faculty/exams/add', methods=['GET', 'POST'])
 def add_exam():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         course_id = request.form.get('course_id')
         exam_date = request.form.get('exam_date')
@@ -316,6 +325,8 @@ def add_exam():
     return render_template('exams.html', courses=getFacultyCourses())
 @app.route('/faculty/exams')
 def facultyExams():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT * FROM exams WHERE Exam_Date>=CURRENT_DATE AND Course_ID=%s;"
     mycursor.execute(query, (session['user'][9],))
     upcoming_exams = mycursor.fetchall()
@@ -326,6 +337,8 @@ def facultyExams():
 
 @app.route('/faculty/results/<int:exam_id>/evaluate', methods=['GET', 'POST'])
 def evaluate(exam_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT Student_ID, CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Full_Name FROM students WHERE Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.Exam_ID = %s ) AND Student_ID NOT IN ( SELECT results.Student_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID WHERE exams.Exam_ID = %s );"
     mycursor.execute(query, (exam_id,exam_id))
     students_to_be_evaluted = mycursor.fetchall()
@@ -345,6 +358,9 @@ def evaluate(exam_id):
 @app.route('/faculty/results/<int:exam_id>/evaluate/<int:student_id>', methods=['POST'])
 def evaluate_student(exam_id, student_id):
     if (request.method=='POST'):
+        
+        if 'user' not in session:
+            return redirect(url_for('login'))
         obtained_marks=request.form.get(f'obtained_marks_{student_id}')
         print("obtained marks",obtained_marks)
         # INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`)
@@ -365,6 +381,9 @@ def evaluate_student(exam_id, student_id):
     
 @app.route('/faculty/results/<int:exam_id>/evaluateall/<string:student_ids>', methods=['POST'])
 def evaluate_students(exam_id, student_ids):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     student_ids = student_ids.split(',')
     print(student_ids)
     for student_id in student_ids:
@@ -403,6 +422,9 @@ def calculate_percentile(data, percentile):
 
 @app.route('/faculty/results/<int:exam_id>/grade/<string:student_ids>', methods=['POST'])
 def result_grade(exam_id, student_ids):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     student_ids = student_ids.split(',')
     query = "SELECT Marks_Obtained FROM results WHERE Exam_ID=%s"
     mycursor.execute(query, (exam_id,))
@@ -426,6 +448,9 @@ def result_grade(exam_id, student_ids):
 
 @app.route('/faculty/results/<int:exam_id>/lock', methods=['POST'])
 def lock(exam_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "UPDATE exams SET Status='Locked' WHERE Exam_ID=%s"
     mycursor.execute(query, (exam_id,))
     query = "UPDATE results SET Status='Locked' WHERE Exam_ID=%s"
@@ -436,6 +461,9 @@ def lock(exam_id):
 
 @app.route('/faculty/results/<int:exam_id>/delete/<int:student_id>', methods=['POST'])
 def delete_student_result(exam_id, student_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if (request.method=='POST'):
         obtained_marks=request.form.get(f'obtained_marks_{student_id}')
         print("obtained marks",obtained_marks)
@@ -461,6 +489,9 @@ def delete_student_result(exam_id, student_id):
 
 @app.route('/faculty/results/<int:exam_id>/view', methods=['GET', 'POST'])
 def view_results(exam_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT results.Result_ID,results.Student_ID,CONCAT(students.First_Name,' ',students.Middle_Name,' ',students.Last_Name) AS Name,results.Marks_Obtained,results.Grade from results INNER JOIN students ON results.Student_ID=students.Student_ID INNER JOIN courses on results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
     mycursor.execute(query, (exam_id,))
     results = mycursor.fetchall()
@@ -473,6 +504,9 @@ def view_results(exam_id):
 
 @app.route('/faculty/results')
 def facultyResults():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     print(f"SELECT * FROM exams WHERE Course_ID={session['user'][9]} and Status='Unevaluated';")
     query = "SELECT * FROM exams WHERE Course_ID=%s and Status='Unevaluated';"
     mycursor.execute(query, (session['user'][9],))
@@ -497,6 +531,9 @@ def facultyResults():
 @app.route('/student/dashboard')
 @app.route('/student')
 def student():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query="SELECT `Student_ID`, CONCAT(`First_Name`, ' ', COALESCE(`Middle_Name`, ''), ' ', `Last_Name`) AS `Full_Name`, CONCAT( COALESCE(`Street`, ''), ', ', COALESCE(`District`, ''), ', ', COALESCE(`State`, ''), ', ', COALESCE(`Country`, '') ) AS `Full_Address`, `Gender`, `Date_of_Birth`, `Email`, `College_Email`, `Password`, `Enrollment_Year`, `Graduation_Year`, `Status` FROM `students` WHERE Student_ID=%s;"
     mycursor.execute(query,(session['user'][0],))
     student=mycursor.fetchall()[0]
@@ -525,6 +562,9 @@ def student():
 
 @app.route('/student/update/<int:student_id>/', methods=['POST'])
 def update_student(student_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         name=request.form.get('studentName')
         names=name.split(' ')
@@ -584,6 +624,9 @@ def update_student(student_id):
 
 @app.route('/student/fees')
 def studentFees():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     student_id = session['user'][0]
     def fetch_fees(query, params):
         mycursor.execute(query, params)
@@ -650,6 +693,9 @@ def studentFees():
 
 @app.route('/student/fees/pay/<int:fee_id>', methods=['POST'])
 def pay_fee(fee_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if request.method=='POST':
         payment_ID=request.form.get(f'payment_id_{fee_id}')
         query="select count(*) from fees where Payment_ID=%s"
@@ -664,6 +710,9 @@ def pay_fee(fee_id):
 
 @app.route('/student/register', methods=['GET', 'POST'])
 def course_register():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         student_id = request.form.get('studentId').strip()
         course_codes = request.form.get('courseCode').strip().split(',')
@@ -696,6 +745,9 @@ def course_register():
 
 @app.route('/student/courses')
 def studentCourses():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT * FROM courses"
     mycursor.execute(query)
     courses = {}
@@ -711,6 +763,9 @@ def studentCourses():
 
 @app.route('/student/results')
 def studentResults():
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT Results.Result_ID,results.Course_ID,courses.Course_Name,exams.Exam_Date,exams.Exam_Type,results.Marks_Obtained,results.Grade,results.Status FROM results INNER JOIN courses on courses.Course_ID=Results.Course_ID INNER JOIN exams ON exams.Exam_ID=results.Exam_ID WHERE Student_ID=%s AND results.Status='Unevaluated'"
     mycursor.execute(query, (session['user'][0],))
     Unevaluated_results = mycursor.fetchall()
@@ -724,6 +779,9 @@ def studentResults():
 
 @app.route('/admin/approve_student/<int:student_id>', methods=['POST'])
 def approve_student(student_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "UPDATE students SET Status='enrolled' WHERE Student_ID=%s"
     mycursor.execute(query, (student_id,))
     mydb.commit()
@@ -731,6 +789,9 @@ def approve_student(student_id):
 
 @app.route('/admin/reject_student/<int:student_id>', methods=['POST'])
 def reject_student(student_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM `students` WHERE Student_ID=%s"
     mycursor.execute(query, (student_id,))
     mydb.commit()
@@ -739,6 +800,8 @@ def reject_student(student_id):
 
 @app.route('/admin/students')
 def adminStudents():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year, Status FROM students;"
     mycursor.execute(query)
     students = mycursor.fetchall()
@@ -760,6 +823,8 @@ def adminStudents():
 
 @app.route('/admin/view_student/<int:student_id>', methods=['GET', 'POST'])
 def view_student(student_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT * FROM students WHERE Student_ID=%s"
     mycursor.execute(query, (student_id,))
     details={}
@@ -775,6 +840,8 @@ def view_student(student_id):
 
 @app.route('/admin/view_student/<int:student_id>/UnEnroll/<string:course_id>', methods=['POST'])
 def UnEnroll(student_id, course_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM `enrollment` WHERE Student_ID=%s AND Course_ID=%s"
     mycursor.execute(query, (student_id, course_id))
     mydb.commit()
@@ -782,6 +849,8 @@ def UnEnroll(student_id, course_id):
 
 @app.route('/admin/courses')
 def adminCourses():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT * FROM courses"
     mycursor.execute(query)
     courses = mycursor.fetchall()
@@ -789,6 +858,8 @@ def adminCourses():
 
 @app.route('/admin/courses/add_course', methods=['POST'])
 def add_course():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     id = request.form.get('course_id')
     name = request.form.get('course_name')
     credits = request.form.get('credits')
@@ -806,6 +877,9 @@ def add_course():
 
 @app.route('/admin/course/update/<string:course_id>', methods=['GET', 'POST'])
 def update_course(course_id):
+    
+    if 'user' not in session:
+        return redirect(url_for('login'))
     new_course_id = request.form.get("course_id")
     new_course_name = request.form.get("course_name")
     new_course_credits = request.form.get("credits")
@@ -838,6 +912,8 @@ def update_course(course_id):
         
 @app.route('/admin/course/delete/<string:course_id>', methods=['POST'])
 def delete_course(course_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     print("course deleted")
     query = "DELETE FROM `courses` WHERE Course_ID=%s"
     mycursor.execute(query, (course_id,))
@@ -846,6 +922,8 @@ def delete_course(course_id):
 
 @app.route('/admin/faculty')
 def adminFaculty():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query="SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name, ' ', COALESCE(faculty.Middle_Name, ''), ' ', faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, courses.Course_Name, department.Department_Name FROM faculty INNER JOIN courses ON courses.Course_ID = faculty.Course_ID INNER JOIN department ON department.Department_ID = faculty.Department_ID WHERE faculty.Status = 'Pending';"
     mycursor.execute(query)
     pending_faculty=mycursor.fetchall()
@@ -857,6 +935,8 @@ def adminFaculty():
 
 @app.route('/admin/faculty/view_faculty/<int:faculty_id>', methods=[ 'POST'])
 def view_faculty(faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name,' ', faculty.Middle_Name, ' ', faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, faculty.Course_ID, courses.Course_Name,faculty.Department_ID,department.Department_Name,faculty.Status FROM faculty INNER JOIN courses ON courses.Course_ID =faculty.Course_ID INNER JOIN department ON department.Department_ID=faculty.Department_ID WHERE faculty.Faculty_ID=%s;"
     mycursor.execute(query, (faculty_id,))
     faculty = mycursor.fetchall()[0]
@@ -868,6 +948,8 @@ def view_faculty(faculty_id):
 
 @app.route('/admin/faculty/approve_faculty/<int:faculty_id>', methods=['POST'])
 def approve_faculty(faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     print("I am here")
     query = "UPDATE faculty SET Status='Active' WHERE Faculty_ID=%s"
     mycursor.execute(query, (faculty_id,))
@@ -877,6 +959,8 @@ def approve_faculty(faculty_id):
 
 @app.route('/admin/faculty/reject_faculty/<int:faculty_id>', methods=['POST'])
 def reject_faculty(faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM faculty WHERE Faculty_ID=%s"
     mycursor.execute(query, (faculty_id,))
     mydb.commit()
@@ -885,6 +969,8 @@ def reject_faculty(faculty_id):
 
 @app.route('/admin/faculty/delete_faculty/<int:faculty_id>', methods=['POST'])
 def delete_faculty(faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM faculty WHERE Faculty_ID=%s"
     mycursor.execute(query, (faculty_id,))
     mydb.commit()
@@ -893,6 +979,8 @@ def delete_faculty(faculty_id):
 
 @app.route('/admin/departments')
 def adminDepartments():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS FacultyCount FROM department INNER JOIN faculty ON faculty.Department_ID = department.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE faculty.Status != 'Pending' GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
     mycursor.execute(query)
     active_departments = mycursor.fetchall()
@@ -904,6 +992,8 @@ def adminDepartments():
 
 @app.route('/admin/departments/add_department', methods=['POST'])
 def add_department():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     department_id = request.form.get('department_id')
     department_name = request.form.get('department_name')
     head_of_department = request.form.get('head_of_department')
@@ -919,6 +1009,8 @@ def add_department():
 
 @app.route('/admin/departments/update/<string:department_id>', methods=['GET', 'POST'])
 def update_department(department_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     new_department_id = request.form.get("department_id")
     new_department_name = request.form.get("department_name")
     if new_department_id != department_id:
@@ -941,6 +1033,8 @@ def update_department(department_id):
         
 @app.route('/admin/departments/delete/<string:department_id>', methods=['POST'])
 def delete_department(department_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM `department` WHERE Department_ID=%s"
     mycursor.execute(query, (department_id,))
     mydb.commit()
@@ -950,6 +1044,8 @@ def delete_department(department_id):
 
 @app.route('/admin/view_department/<string:department_id>', methods=['GET', 'POST'])
 def view_department(department_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query="SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS Faculty_Count FROM department INNER JOIN faculty ON department.Department_ID = faculty.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE department.Department_ID = %s GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
     mycursor.execute(query, (department_id,))
     try:
@@ -964,6 +1060,8 @@ def view_department(department_id):
 
 @app.route('/admin/view_department/<string:department_id>/appoint_HOD', methods=['GET', 'POST'])
 def appoint_HOD(department_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     if request.method == 'POST':
         faculty_id = request.form.get('hod_id')
         query = "UPDATE department SET Head_of_Department=%s WHERE Department_ID=%s"
@@ -975,6 +1073,8 @@ def appoint_HOD(department_id):
 
 @app.route('/admin/view_department/<string:department_id>/update_faculty/<int:faculty_id>', methods=['GET', 'POST'])
 def update_faculty_(department_id, faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     new_faculty_id = int(request.form.get(f"faculty_id_{faculty_id}"))
     new_faculty_name = request.form.get(f"faculty_name_{faculty_id}")
     new_faculty_designation = request.form.get(f"faculty_designation_{faculty_id}")
@@ -1013,6 +1113,8 @@ def update_faculty_(department_id, faculty_id):
     return redirect(url_for('adminDepartments'))
 @app.route('/admin/view_department/<string:department_id>/delete_faculty/<int:faculty_id>', methods=['GET', 'POST'])
 def delete_faculty_(department_id, faculty_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     # Delete the specified faculty
     query = "DELETE FROM faculty WHERE Faculty_ID=%s"
     mycursor.execute(query, (faculty_id,))
@@ -1032,6 +1134,8 @@ def delete_faculty_(department_id, faculty_id):
 
 @app.route('/admin/exams')
 def adminExams():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date>=CURRENT_DATE ;"
     mycursor.execute(query)
     upcoming_exams = mycursor.fetchall()
@@ -1045,6 +1149,8 @@ def adminExams():
 
 @app.route('/admin/exams/update_exam/<int:exam_id>/', methods=['POST'])
 def update_exam_admin(exam_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     new_exam_id = int(request.form.get(f'exam_id_{exam_id}'))
     new_exam_date = request.form.get(f'exam_date_{exam_id}')
     new_exam_duration = request.form.get(f'exam_duration_{exam_id}')
@@ -1088,6 +1194,8 @@ def update_exam(new_exam_id, new_exam_date, new_exam_duration, new_exam_type, ne
 
 @app.route('/admin/exams/delete_exam/<int:exam_id>/')
 def delete_exam_admin(exam_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "DELETE FROM exams WHERE Exam_ID=%s"
     mycursor.execute(query, (exam_id,))
     mydb.commit()
@@ -1095,6 +1203,8 @@ def delete_exam_admin(exam_id):
 
 @app.route('/admin/results/<int:exam_id>/view', methods=['GET', 'POST'])
 def view_results_admin(exam_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT results.Result_ID,results.Student_ID,CONCAT(students.First_Name,' ',students.Middle_Name,' ',students.Last_Name) AS Name,results.Marks_Obtained,results.Grade from results INNER JOIN students ON results.Student_ID=students.Student_ID INNER JOIN courses on results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
     mycursor.execute(query, (exam_id,))
     results = mycursor.fetchall()
@@ -1105,9 +1215,8 @@ def view_results_admin(exam_id):
 
 @app.route('/admin/results/')
 def adminResults():
-    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date>=CURRENT_DATE ;"
-    mycursor.execute(query)
-    upcoming_exams = mycursor.fetchall()
+    if 'user' not in session:
+        return redirect(url_for('login'))
     query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date<CURRENT_DATE AND exams.Status!='Locked';"
     mycursor.execute(query)
     Unevaluated_Result = mycursor.fetchall()
@@ -1118,6 +1227,8 @@ def adminResults():
 
 @app.route('/admin')
 def admin():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     return render_template('adminDashboard.html')
 
 
@@ -1154,7 +1265,6 @@ def signin():
         else:
             return "Invalid User Type"
     return render_template('signin.html')
-
 
 
 
