@@ -92,7 +92,8 @@
             <tr>
                 <th>Department Code</th>
                 <th>Department Name</th>
-                <th>Head of Department</th>
+                <th>HOD ID</th>
+                <th>HOD Name</th>
                 <th>No. of faculty</th>
                 <th>Action</th>
             </tr>
@@ -103,6 +104,7 @@
                     </td>
                     <td><input class="formattedInput" type="text" name="semester" value="{{ department[2] }}"></td>
                     <td><input class="formattedInput" type="text" name="credits" value="{{ department[3] }}"></td>
+                    <td><input class="formattedInput" type="text" name="credits" value="{{ department[4] }}"></td>
                     <td>
                         <button type="submit">Update</button>
                 </form>
@@ -121,19 +123,21 @@
             <tr>
                 <th>Faculty ID</th>
                 <th>Faculty Name</th>
-                <th>Head of Department</th>
-                <th>No. of faculty</th>
+                <th>Designation</th>
+                <th>Mail    </th>
+                <th>Work Mail</th>
                 <th>Action</th>
             </tr>
             {% for faculty in faculties %}
 
             <tr>
-                <form action="/admin/departments/update/{{ faculty[0] }}" method="post">
-                    <td><input class="formattedInput" type="text" name="department_id" value="{{ faculty[0] }}"></td>
-                    <td><input class="formattedInput" type="text" name="department_name" value="{{ faculty[1] }}">
+                <form action="/admin/view_department/{{department[0]}}>/update_faculty/{{faculty[0]}}" method="post" >
+                    <td><input class="formattedInput" type="text" name="faculty_id" value="{{ faculty[0] }}" ></td>
+                    <td><input class="formattedInput" type="text" name="faculty_name" value="{{ faculty[1] }}">
                     </td>
-                    <td><input class="formattedInput" type="text" name="semester" value="{{ faculty[2] }}"></td>
-                    <td><input class="formattedInput" type="text" name="credits" value="{{ faculty[3] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_designation" value="{{ faculty[2] }}" readonly></td>
+                    <td><input class="formattedInput" type="text" name="faculty_mail" value="{{ faculty[3] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_official_mail" value="{{ faculty[4] }}" readonly></td>
                     <td>
                         <button type="submit">Update</button>
                 </form>
@@ -149,36 +153,39 @@
         </table>
         <h3>Appoint Head Of Department</h3>
         <table>
-            <tr>
-                <th>
-                    Faculty ID : 
-                </th>
-                <td>
-                    <select name="hod_id" id="hod_id" onchange="syncFacultyName()">
-                        {% for faculty in faculties %}
-                        <option value="{{faculty[0]}}">{{faculty[0]}}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th>
-                    Faculty Name : 
-                </th>
-                <td>
-                    <select name="hod_name" id="hod_name" onchange="syncFacultyId()">
-                        {% for faculty in faculties %}
-                        <option value="{{faculty[1]}}">{{faculty[1]}}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-            <tr colspan="2">
-                <td>
-                    <button type="submit">Appoint</button>
-                </td>
+            <form action="/admin/view_department/{{department[0]}}/appoint_HOD" method="post">
 
-            </tr>
+                <tr>
+                    <th>
+                        Faculty ID :
+                    </th>
+                    <td>
+                        <select name="hod_id" id="hod_id" onchange="syncFacultyName()">
+                            {% for faculty in faculties %}
+                            <option value="{{faculty[0]}}">{{faculty[0]}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Faculty Name :
+                    </th>
+                    <td>
+                        <select name="hod_name" id="hod_name" onchange="syncFacultyId()">
+                            {% for faculty in faculties %}
+                            <option value="{{faculty[1]}}">{{faculty[1]}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+                <tr colspan="2">
+                    <td>
+                        <button type="submit">Appoint</button>
+                    </td>
+
+                </tr>
+            </form>
         </table>
     </main>
     <footer>
@@ -186,23 +193,24 @@
     </footer>
 </body>
 <script>
-function syncFacultyName(){
-    var facultyId = document.getElementById('hod_id').value;
-    var facultyName=document.getElementById('hod_name');
-    {% for faculty in faculties %}
-    if('{{faculty[0]}}' == facultyId){
-        document.getElementById('hod_name').value = '{{faculty[1]}}';
+    function syncFacultyName() {
+        var facultyId = document.getElementById('hod_id').value;
+        var facultyName = document.getElementById('hod_name');
+        {% for faculty in faculties %}
+        if ('{{faculty[0]}}' == facultyId) {
+            document.getElementById('hod_name').value = '{{faculty[1]}}';
+        }
+        {% endfor %}
     }
-    {% endfor %}
-}
-function syncFacultyId(){
-    var facultyName = document.getElementById('hod_name').value;
-    var facultyID=document.getElementById('hod_id');
-    {% for faculty in faculties %}
-    if('{{faculty[1]}}' == facultyName){
-        document.getElementById('hod_id').value = '{{faculty[0]}}';
+    function syncFacultyId() {
+        var facultyName = document.getElementById('hod_name').value;
+        var facultyID = document.getElementById('hod_id');
+        {% for faculty in faculties %}
+        if ('{{faculty[1]}}' == facultyName) {
+            document.getElementById('hod_id').value = '{{faculty[0]}}';
+        }
+        {% endfor %}
     }
-    {% endfor %}
-}
 </script>
+
 </html>
