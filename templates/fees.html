@@ -114,7 +114,7 @@
             color: #fff;
             text-align: center;
             padding: 10px 0;
-            position: absolute;
+            position: fixed;
             width: 100%;
             bottom: 0;
         }
@@ -132,7 +132,6 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
         {% if course_registration_fees_pending %}
         <section>
@@ -357,6 +356,9 @@
                 </tbody>
             </table>
         </section>
+        {% endif %}
+        {% if not course_registration_fees_pending and not course_registration_fees_paid and not exam_fees_pending and not exam_fees_paid and not registration_fees_pending and not registration_fees_paid %}
+        <h1>No Fees available in database</h1>
         {% endif %}
     </main>
     <footer>
