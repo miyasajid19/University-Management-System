@@ -827,6 +827,85 @@ def delete_faculty_(department_id, faculty_id):
     # Otherwise, redirect back to the view_department page
     return redirect(url_for('view_department', department_id=department_id))
 
+@app.route('/admin/exams')
+def adminExams():
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date>=CURRENT_DATE ;"
+    mycursor.execute(query)
+    upcoming_exams = mycursor.fetchall()
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date<CURRENT_DATE AND exams.Status!='Locked';"
+    mycursor.execute(query)
+    recent_Unevaluated_exams = mycursor.fetchall()
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date<CURRENT_DATE AND exams.Status='Locked';"
+    mycursor.execute(query)
+    recent_Evaluated_exams = mycursor.fetchall()
+    return render_template('manage_exams.html', upcoming_exams=upcoming_exams, recent_Unevaluated_exams=recent_Unevaluated_exams, recent_Evaluated_exams=recent_Evaluated_exams)
+
+@app.route('/admin/exams/update_exam/<int:exam_id>/', methods=['POST'])
+def update_exam_admin(exam_id):
+    new_exam_id = int(request.form.get(f'exam_id_{exam_id}'))
+    new_exam_date = request.form.get(f'exam_date_{exam_id}')
+    new_exam_duration = request.form.get(f'exam_duration_{exam_id}')
+    new_exam_type = request.form.get(f'exam_type_{exam_id}')
+    new_venue = request.form.get(f'venue_{exam_id}')
+    course_id = request.form.get(f'course_id_{exam_id}')
+
+    if new_exam_id != exam_id:
+        if exam_exists(new_exam_id):
+            return "Can't update exam id as it already exists"
+        if exam_type_exists(course_id, new_exam_type, new_exam_id):
+            return "Exam Type already exists"
+        update_exam(new_exam_id, new_exam_date, new_exam_duration, new_exam_type, new_venue, exam_id)
+    else:
+        if exam_type_exists(course_id, new_exam_type, exam_id):
+            return "Exam Type already exists"
+        update_exam(None, new_exam_date, new_exam_duration, new_exam_type, new_venue, exam_id)
+
+    return redirect(url_for('adminExams'))
+
+def exam_exists(exam_id):
+    query = "SELECT * FROM exams WHERE Exam_ID=%s"
+    mycursor.execute(query, (exam_id,))
+    return mycursor.fetchone() is not None
+
+def exam_type_exists(course_id, exam_type, exam_id):
+    query = "SELECT COUNT(*) FROM exams WHERE Course_ID=%s AND Exam_Type=%s AND Exam_ID!=%s"
+    mycursor.execute(query, (course_id, exam_type, exam_id))
+    return mycursor.fetchone()[0] > 0
+
+def update_exam(new_exam_id, new_exam_date, new_exam_duration, new_exam_type, new_venue, exam_id):
+    if new_exam_id:
+        query = "UPDATE exams SET Exam_ID=%s, Exam_Date=%s, Exam_Duration=%s, Exam_Type=%s, Venue=%s WHERE Exam_ID=%s"
+        values = (new_exam_id, new_exam_date, new_exam_duration, new_exam_type, new_venue, exam_id)
+    else:
+        query = "UPDATE exams SET Exam_Date=%s, Exam_Duration=%s, Exam_Type=%s, Venue=%s WHERE Exam_ID=%s"
+        values = (new_exam_date, new_exam_duration, new_exam_type, new_venue, exam_id)
+    mycursor.execute(query, values)
+    mydb.commit()
+
+
+@app.route('/admin/exams/delete_exam/<int:exam_id>/')
+def delete_exam_admin(exam_id):
+    query = "DELETE FROM exams WHERE Exam_ID=%s"
+    mycursor.execute(query, (exam_id,))
+    mydb.commit()
+    return redirect(url_for('adminExams'))
+
+@app.route('/admin/results/<int:exam_id>/view', methods=['GET', 'POST'])
+def view_results_admin(exam_id):
+    query = "SELECT results.Result_ID,results.Student_ID,CONCAT(students.First_Name,' ',students.Middle_Name,' ',students.Last_Name) AS Name,results.Marks_Obtained,results.Grade from results INNER JOIN students ON results.Student_ID=students.Student_ID INNER JOIN courses on results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
+    mycursor.execute(query, (exam_id,))
+    results = mycursor.fetchall()
+    query="SELECT DISTINCT courses.Course_Name, courses.Credits FROM courses INNER JOIN results ON results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
+    mycursor.execute(query,(exam_id,))  
+    course=mycursor.fetchall()[0]
+    return render_template('view_result_admin.html', results=results, exam_id=exam_id,course=course)
+
+@app.route('/admin/results/')
+def adminResults():
+    query = "SELECT * FROM exams WHERE Status='Locked';"
+    mycursor.execute(query)
+    Locked_Result = mycursor.fetchall()
+    return render_template('manage_results.html', Locked_Result=Locked_Result)
 
 @app.route('/admin')
 def admin():
