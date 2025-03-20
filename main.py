@@ -135,6 +135,10 @@ def register_student(FirstName, MiddleName, LastName, email, phones, form):
         values = (result, phone)
         mycursor.execute(sql, values)
     mydb.commit()
+    query = "INSERT INTO `fees`(`Student_ID`, `Amount`,  `Type`) VALUES (%s, %s,  %s)"
+    values = (result, 1500,'Registration Fees')
+    mycursor.execute(query, values)
+    mydb.commit()
 
 
 
@@ -270,23 +274,46 @@ def facultyStudents():
     mycursor.execute(query)
     students = mycursor.fetchall()
     return render_template('students.html', students=students)
-
-
 @app.route('/faculty/exams/add', methods=['GET', 'POST'])
-def add():
-    course_id=request.form.get('course_id')
-    exam_date=request.form.get('exam_date')
-    exam_duration=request.form.get('exam_duration')
-    exam_type=request.form.get('exam_type')
-    venue=request.form.get('venue')
-    query="INSERT INTO `exams`(`Course_ID`, `Exam_Date`, `Exam_Duration`, `Exam_Type`, `Venue`) VALUES (%s, %s, %s, %s, %s)"
-    values=(course_id,exam_date,exam_duration,exam_type,venue)
-    mycursor.execute(query,values)    
-    query="INSERT IGNORE INTO takes_exams (Student_ID, Exam_ID) SELECT enrollment.Student_ID, exams.Exam_ID FROM enrollment INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID;"
-    mycursor.execute(query)
-    mydb.commit()
-    return "Exam Added Successfully"
-
+def add_exam():
+    if request.method == 'POST':
+        course_id = request.form.get('course_id')
+        exam_date = request.form.get('exam_date')
+        exam_duration = request.form.get('exam_duration')
+        exam_charge = float(request.form.get('exam_charge'))
+        exam_type = request.form.get('exam_type')
+        venue = request.form.get('venue')
+        
+        query = """
+            INSERT INTO exams (Course_ID, Exam_Date, Exam_Duration, Exam_Type, Venue) 
+            VALUES (%s, %s, %s, %s, %s)
+        """
+        values = (course_id, exam_date, exam_duration, exam_type, venue)
+        mycursor.execute(query, values)
+        mydb.commit()
+        
+        query = """
+            INSERT IGNORE INTO takes_exams (Student_ID, Exam_ID) 
+            SELECT enrollment.Student_ID, exams.Exam_ID 
+            FROM enrollment 
+            INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID 
+            WHERE exams.Course_ID = %s AND exams.Exam_Type = %s
+        """
+        mycursor.execute(query, (course_id, exam_type))
+        mydb.commit()
+        if(exam_charge>0):
+            query = """
+                INSERT IGNORE INTO fees (Student_ID, Exam_ID, Amount, Type) 
+                SELECT enrollment.Student_ID, exams.Exam_ID,  %s, 'Exam Fee' 
+                FROM enrollment 
+                INNER JOIN exams ON exams.Course_ID = enrollment.Course_ID 
+                WHERE exams.Course_ID = %s AND exams.Exam_Type = %s
+            """
+            mycursor.execute(query, (exam_charge,course_id, exam_type))
+            mydb.commit()
+        
+        return redirect(url_for('facultyExams'))
+    return render_template('exams.html', courses=getFacultyCourses())
 @app.route('/faculty/exams')
 def facultyExams():
     query = "SELECT * FROM exams WHERE Exam_Date>=CURRENT_DATE AND Course_ID=%s;"
@@ -470,11 +497,85 @@ def student():
     return render_template('studentDashboard.html')
 
 
+@app.route('/student/fees')
+def studentFees():
+    student_id = session['user'][0]
+    def fetch_fees(query, params):
+        mycursor.execute(query, params)
+        return mycursor.fetchall()
+    course_registration_fees_pending_query = """
+        SELECT fees.Fee_ID, fees.Course_ID, courses.Course_Name, fees.Amount, fees.Issued_Date, fees.Type
+        FROM fees
+        INNER JOIN courses ON courses.Course_ID = fees.Course_ID
+        WHERE fees.student_id = %s AND fees.Status = 'Pending'
+    """
+    course_registration_fees_pending = fetch_fees(course_registration_fees_pending_query, (student_id,))
+    course_registration_fees_paid_query = """
+        SELECT fees.Fee_ID, fees.Course_ID, courses.Course_Name, fees.Amount, fees.Issued_Date, fees.Payment_Date, fees.Type, fees.Payment_ID
+        FROM fees
+        INNER JOIN courses ON courses.Course_ID = fees.Course_ID
+        WHERE fees.student_id = %s AND fees.Status != 'Pending'
+    """
+    course_registration_fees_paid = fetch_fees(course_registration_fees_paid_query, (student_id,))
+    exam_fees_query_pending = """
+        SELECT fees.Fee_ID, fees.Student_ID, fees.Exam_Id, fees.Amount, fees.Issued_Date, fees.Status, exams_with_courses.Exam_Type, exams_with_courses.Course_Name, exams_with_courses.Course_ID
+        FROM fees
+        INNER JOIN (
+            SELECT exams.Exam_ID, courses.Course_Name, exams.Exam_Type, courses.Course_ID
+            FROM exams
+            INNER JOIN courses ON exams.Course_ID = courses.Course_ID
+        ) AS exams_with_courses ON fees.Exam_ID = exams_with_courses.Exam_ID
+        WHERE fees.student_id = %s AND fees.Status = 'Pending'
+    """
+    exam_fees_pending = fetch_fees(exam_fees_query_pending, (student_id,))
+
+    exam_fees_query_paid = """
+        SELECT fees.Fee_ID, fees.Student_ID, fees.Exam_Id, fees.Amount, fees.Issued_Date, fees.Payment_Date, fees.Payment_ID, exams_with_courses.Exam_Type, exams_with_courses.Course_Name, exams_with_courses.Course_ID
+        FROM fees
+        INNER JOIN (
+            SELECT exams.Exam_ID, courses.Course_Name, exams.Exam_Type, courses.Course_ID
+            FROM exams
+            INNER JOIN courses ON exams.Course_ID = courses.Course_ID
+        ) AS exams_with_courses ON fees.Exam_ID = exams_with_courses.Exam_ID
+        WHERE fees.student_id = %s AND fees.Status != 'Pending'
+    """
+    exam_fees_paid = fetch_fees(exam_fees_query_paid, (student_id,))
+    registration_fees_pending_query = """
+        SELECT Fee_ID, Student_ID, Amount, Issued_Date, Type, Status
+        FROM fees
+        WHERE Student_ID = %s AND Type = 'Registration Fees' AND Status = 'Pending'
+    """
+    registration_fees_pending = fetch_fees(registration_fees_pending_query, (student_id,))
+    registration_fees_paid_query = """
+        SELECT Fee_ID, Student_ID, Amount, Issued_Date, Type, Payment_Date, Payment_ID
+        FROM fees
+        WHERE Student_ID = %s AND Type = 'Registration Fees' AND Status != 'Pending'
+    """
+    registration_fees_paid = fetch_fees(registration_fees_paid_query, (student_id,))
+    return render_template(
+        'fees.html',
+        course_registration_fees_pending=course_registration_fees_pending,
+        course_registration_fees_paid=course_registration_fees_paid,
+        exam_fees_pending=exam_fees_pending,
+        exam_fees_paid=exam_fees_paid,
+        registration_fees_pending=registration_fees_pending,
+        registration_fees_paid=registration_fees_paid
+    )
 
 
-
-
-
+@app.route('/student/fees/pay/<int:fee_id>', methods=['POST'])
+def pay_fee(fee_id):
+    if request.method=='POST':
+        payment_ID=request.form.get(f'payment_id_{fee_id}')
+        query="select count(*) from fees where Payment_ID=%s"
+        mycursor.execute(query,(payment_ID,))
+        if mycursor.fetchone()[0]>0:
+            return "Invalid Payment ID";
+        query = "UPDATE fees SET Status='Paid', Payment_Date=%s, payment_ID=%s WHERE Fee_ID=%s"
+        values = (datetime.datetime.now().date(),payment_ID,fee_id)
+        mycursor.execute(query, values)
+        mydb.commit()
+        return redirect(url_for('studentFees'))
 
 @app.route('/student/register', methods=['GET', 'POST'])
 def course_register():
@@ -490,13 +591,16 @@ def course_register():
             return "<script>alert('Already Registered for the course')</script>"
 
         for course_code in new_course_codes:
-            mycursor.execute("SELECT Course_ID FROM courses WHERE Course_ID=%s", (course_code,))
-            course_id = mycursor.fetchone()[0]
+            mycursor.execute("SELECT Course_ID,Price FROM courses WHERE Course_ID=%s", (course_code,))
+            course_id,price = mycursor.fetchone()
 
             query = "INSERT INTO `enrollment`(`Student_ID`, `Course_ID`, `Enrolled_IN`) VALUES (%s, %s, %s)"
             values = (student_id, course_id, datetime.datetime.now().date())
             mycursor.execute(query, values)
-        
+
+            query = "INSERT INTO `fees`(`Student_ID`, `Course_ID`, `Amount`, `Type`) VALUES (%s, %s, %s, %s)"
+            values = (student_id, course_id, price, 'Course Registration')
+            mycursor.execute(query, values)
         mydb.commit()
         return "Course Registered Successfully"
     return render_template('studentDashboard.html')
@@ -590,12 +694,13 @@ def add_course():
     id = request.form.get('course_id')
     name = request.form.get('course_name')
     credits = request.form.get('credits')
+    price = request.form.get('price')
     semester = request.form.get('semester')
     mycursor.execute("SELECT * FROM courses WHERE Course_ID=%s", (id,))
     if mycursor.fetchone():
         return "Course ID already exists"
-    query = "INSERT INTO `courses`(`Course_ID`, `Course_Name`, `Credits`, `Semester`) VALUES (%s, %s, %s, %s)"
-    values = (id, name, credits, semester)
+    query = "INSERT INTO `courses`(`Course_ID`, `Course_Name`, `Credits`, `Semester`,`Price`) VALUES (%s, %s, %s, %s,%s)"
+    values = (id, name, credits, semester, price)
     mycursor.execute(query, values)
     mydb.commit()
     print("courses added")
@@ -607,6 +712,7 @@ def update_course(course_id):
     new_course_name = request.form.get("course_name")
     new_course_credits = request.form.get("credits")
     new_course_semester = request.form.get("semester")
+    new_course_price = request.form.get("price")
     print("new_course_id",new_course_id)
     print("new_course_name",new_course_name)
     print("new_course_credits",new_course_credits)
@@ -620,13 +726,13 @@ def update_course(course_id):
         if course:
             return "can't update course id as it already exists"
         else:
-            query="UPDATE courses SET  Course_ID=%s,Course_Name=%s, Credits=%s, Semester=%s WHERE Course_ID=%s"
-            values=(new_course_id,new_course_name,new_course_credits,new_course_semester,course_id)
+            query="UPDATE courses SET  Course_ID=%s,Course_Name=%s, Credits=%s, Semester=%s,price=%s WHERE Course_ID=%s"
+            values=(new_course_id,new_course_name,new_course_credits,new_course_semester,new_course_price,course_id)
             mycursor.execute(query,values)
             mydb.commit()
     else:
-        query="UPDATE courses SET  Course_Name=%s, Credits=%s, Semester=%s WHERE Course_ID=%s"
-        values=(new_course_name,float(new_course_credits),new_course_semester,course_id)
+        query="UPDATE courses SET  Course_Name=%s, Credits=%s, Semester=%s,price=%s WHERE Course_ID=%s"
+        values=(new_course_name,float(new_course_credits),new_course_semester,new_course_price,course_id)
         mycursor.execute(query,values)
         mydb.commit()    
     print("course updated")
@@ -692,7 +798,6 @@ def adminDepartments():
     query = "SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS FacultyCount FROM department INNER JOIN faculty ON faculty.Department_ID = department.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE faculty.Status != 'Pending' GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
     mycursor.execute(query)
     active_departments = mycursor.fetchall()
-    active_department_ids = [x[0] for x in active_departments]
     query = "SELECT * FROM `department` WHERE Department_ID NOT IN (SELECT department.Department_ID FROM department INNER JOIN faculty ON faculty.Department_ID = department.Department_ID WHERE faculty.Status != 'Pending' GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department);"
     mycursor.execute(query)
     inactive_departments = mycursor.fetchall()
@@ -902,10 +1007,16 @@ def view_results_admin(exam_id):
 
 @app.route('/admin/results/')
 def adminResults():
-    query = "SELECT * FROM exams WHERE Status='Locked';"
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date>=CURRENT_DATE ;"
     mycursor.execute(query)
-    Locked_Result = mycursor.fetchall()
-    return render_template('manage_results.html', Locked_Result=Locked_Result)
+    upcoming_exams = mycursor.fetchall()
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date<CURRENT_DATE AND exams.Status!='Locked';"
+    mycursor.execute(query)
+    Unevaluated_Result = mycursor.fetchall()
+    query = "SELECT exams.Exam_ID, exams.Course_ID, exams.Exam_Date, exams.Exam_Duration, exams.Exam_Type, exams.Venue, exams.Status,courses.Course_Name,courses.Credits FROM exams INNER JOIN courses ON exams.Course_ID=courses.Course_ID WHERE exams.Exam_Date<CURRENT_DATE AND exams.Status='Locked';"
+    mycursor.execute(query)
+    Evautated_Result = mycursor.fetchall()
+    return render_template('manage_results.html', Evautated_Result=Evautated_Result, Unevaluated_Result=Unevaluated_Result)
 
 @app.route('/admin')
 def admin():
