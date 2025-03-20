@@ -749,7 +749,10 @@ def delete_department(department_id):
 def view_department(department_id):
     query="SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS Faculty_Count FROM department INNER JOIN faculty ON department.Department_ID = faculty.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE department.Department_ID = %s GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
     mycursor.execute(query, (department_id,))
-    department = mycursor.fetchall()[0]
+    try:
+        department = mycursor.fetchall()[0]
+    except :
+        department=mycursor.fetchone()
     query = "SELECT Faculty_ID, CONCAT(First_Name, ' ', COALESCE(Middle_Name, ''), ' ', Last_Name) AS Name, Designation, Mail, Official_Mail FROM faculty WHERE Department_ID=%s"
     mycursor.execute(query, (department_id,))
     faculties= mycursor.fetchall()
@@ -769,11 +772,11 @@ def appoint_HOD(department_id):
 
 @app.route('/admin/view_department/<string:department_id>/update_faculty/<int:faculty_id>', methods=['GET', 'POST'])
 def update_faculty_(department_id, faculty_id):
-    new_faculty_id = int(request.form.get("faculty_id"))
-    new_faculty_name = request.form.get("faculty_name")
-    new_faculty_designation = request.form.get("faculty_designation")
-    new_faculty_mail = request.form.get("faculty_mail")
-    new_faculty_official_mail = request.form.get("faculty_official_mail")
+    new_faculty_id = int(request.form.get(f"faculty_id_{faculty_id}"))
+    new_faculty_name = request.form.get(f"faculty_name_{faculty_id}")
+    new_faculty_designation = request.form.get(f"faculty_designation_{faculty_id}")
+    new_faculty_mail = request.form.get(f"faculty_mail_{faculty_id}")
+    new_faculty_official_mail = request.form.get(f"faculty_official_mail_{faculty_id}")
     new_faculty_name=new_faculty_name.strip().split(' ')
     if(len(new_faculty_name)==1):
         FirstName=new_faculty_name[0]
@@ -805,6 +808,24 @@ def update_faculty_(department_id, faculty_id):
         mydb.commit()
 
     return redirect(url_for('adminDepartments'))
+@app.route('/admin/view_department/<string:department_id>/delete_faculty/<int:faculty_id>', methods=['GET', 'POST'])
+def delete_faculty_(department_id, faculty_id):
+    # Delete the specified faculty
+    query = "DELETE FROM faculty WHERE Faculty_ID=%s"
+    mycursor.execute(query, (faculty_id,))
+    mydb.commit()
+
+    # Check if there are any faculty left in the department
+    check_query = "SELECT COUNT(*) FROM faculty WHERE Department_ID=%s"
+    mycursor.execute(check_query, (department_id,))
+    count = mycursor.fetchone()[0]  # Fetch the count value
+
+    if count == 0:
+        # If no faculty are left, redirect to adminDepartments
+        return redirect(url_for('adminDepartments'))
+
+    # Otherwise, redirect back to the view_department page
+    return redirect(url_for('view_department', department_id=department_id))
 
 
 @app.route('/admin')
