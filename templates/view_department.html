@@ -131,17 +131,18 @@
             {% for faculty in faculties %}
 
             <tr>
-                <form action="/admin/view_department/{{department[0]}}>/update_faculty/{{faculty[0]}}" method="post" >
-                    <td><input class="formattedInput" type="text" name="faculty_id" value="{{ faculty[0] }}" ></td>
-                    <td><input class="formattedInput" type="text" name="faculty_name" value="{{ faculty[1] }}">
+                
+                <form action="/admin/view_department/{{department[0]}}/update_faculty/{{faculty[0]}}" method="post" >
+                    <td><input class="formattedInput" type="text" name="faculty_id_{{faculty[0]}}" value="{{ faculty[0] }}" ></td>
+                    <td><input class="formattedInput" type="text" name="faculty_name_{{faculty[0]}}" value="{{ faculty[1] }}">
                     </td>
-                    <td><input class="formattedInput" type="text" name="faculty_designation" value="{{ faculty[2] }}" readonly></td>
-                    <td><input class="formattedInput" type="text" name="faculty_mail" value="{{ faculty[3] }}"></td>
-                    <td><input class="formattedInput" type="text" name="faculty_official_mail" value="{{ faculty[4] }}" readonly></td>
+                    <td><input class="formattedInput" type="text" name="faculty_designation_{{faculty[0]}}" value="{{ faculty[2] }}" readonly></td>
+                    <td><input class="formattedInput" type="text" name="faculty_mail_{{faculty[0]}}" value="{{ faculty[3] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_official_mail_{{faculty[0]}}" value="{{ faculty[4] }}" readonly></td>
                     <td>
                         <button type="submit">Update</button>
                 </form>
-                <form action="/admin/departments/delete/{{ department[0] }}" method="post" style="display:inline;">
+                <form action="/admin/view_department/{{department[0]}}/delete_faculty/{{faculty[0]}}" method="post" style="display:inline;">
                     <button type="submit">Delete</button>
                 </form>
                 <form action="/admin/view_department/{{department[0]}}" method="post" style="display:inline;">
