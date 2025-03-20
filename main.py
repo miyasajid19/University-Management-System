@@ -299,13 +299,19 @@ def facultyExams():
 
 @app.route('/faculty/results/<int:exam_id>/evaluate', methods=['GET', 'POST'])
 def evaluate(exam_id):
-    query = "SELECT Student_ID,concat(First_Name,' ',Middle_Name,' ',Last_Name) FROM students WHERE Student_ID in (SELECT takes_exams.Student_ID from takes_exams INNER JOIN exams on exams.Exam_ID=takes_exams.Exam_ID WHERE exams.Exam_ID=%s) AND Student_ID NOT IN (SELECT results.Student_ID from results INNER join exams on results.Exam_ID=exams.Exam_ID);"
-    mycursor.execute(query, (exam_id,))
+    query = "SELECT Student_ID, CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Full_Name FROM students WHERE Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.Exam_ID = %s ) AND Student_ID NOT IN ( SELECT results.Student_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID WHERE exams.Exam_ID = %s );"
+    mycursor.execute(query, (exam_id,exam_id))
     students_to_be_evaluted = mycursor.fetchall()
-    query = "SELECT students.Student_ID, CONCAT(students.First_Name, ' ', students.Middle_Name, ' ', students.Last_Name) AS Full_Name, results.Marks_Obtained, results.Grade FROM students INNER JOIN results ON results.Student_ID = students.Student_ID WHERE students.Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.Exam_ID = %s ) AND students.Student_ID IN ( SELECT results.Student_ID FROM results INNER JOIN exams ON results.Exam_ID = exams.Exam_ID );"
-    mycursor.execute(query, (exam_id,))
+    query = """ SELECT students.Student_ID, CONCAT(students.First_Name, ' ', students.Middle_Name, ' ', students.Last_Name) AS Full_Name, results.Marks_Obtained, results.Grade FROM students INNER JOIN results ON results.Student_ID = students.Student_ID WHERE students.Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.Exam_ID = %s ) AND results.Exam_ID = %s; """
+    mycursor.execute(query, (exam_id,exam_id))
     students_evaluted = mycursor.fetchall()
-    return render_template('result_evaluation.html', students_to_be_evaluted=students_to_be_evaluted, students_evaluted=students_evaluted, exam_id=exam_id)
+    query = "SELECT students.Student_ID, CONCAT(students.First_Name, ' ', students.Middle_Name, ' ', students.Last_Name) AS Full_Name, results.Marks_Obtained, results.Grade FROM students INNER JOIN results ON results.Student_ID = students.Student_ID WHERE students.Student_ID IN ( SELECT takes_exams.Student_ID FROM takes_exams INNER JOIN exams ON exams.Exam_ID = takes_exams.Exam_ID WHERE exams.status = 'Locked' AND exams.Exam_ID = %s ) AND results.Exam_ID = %s;"
+    mycursor.execute(query, (exam_id,exam_id))
+    Locked_Result = mycursor.fetchall()
+    print("Locked_Result",Locked_Result)
+    print("students_evaluted",students_evaluted)
+    print("students_to_be_evaluted",students_to_be_evaluted)
+    return render_template('result_evaluation.html', students_to_be_evaluted=students_to_be_evaluted, students_evaluted=students_evaluted, Locked_Result=Locked_Result,exam_id=exam_id)
 
 
 
@@ -352,6 +358,7 @@ def evaluate_students(exam_id, student_ids):
         else:
             
             query = "INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`) VALUES (%s, %s, %s, %s)"
+            print(f"INSERT INTO `results`(`Exam_ID`, `Student_ID`, `Course_ID`, `Marks_Obtained`) VALUES ({exam_id}, {student_id}, {session['user'][9]}, {obtained_marks})")
             values = (exam_id, student_id, session['user'][9], obtained_marks)
             mycursor.execute(query, values)
         mydb.commit()
@@ -384,7 +391,7 @@ def result_grade(exam_id, student_ids):
         obtained_marks = float(request.form.get(f'obtained_marks_{student_id}', 0))
         grade = next(grade for p, grade in grade_map.items() if obtained_marks >= percentiles.get(p, 0))
         
-        query = "UPDATE results SET Grade=%s WHERE Exam_ID=%s AND Student_ID=%s"
+        query = "UPDATE results SET Grade=%s, Status='Evaluated' WHERE Exam_ID=%s AND Student_ID=%s"
         mycursor.execute(query, (grade, exam_id, student_id))
     
     mydb.commit()
@@ -392,7 +399,7 @@ def result_grade(exam_id, student_ids):
 
 @app.route('/faculty/results/<int:exam_id>/lock', methods=['POST'])
 def lock(exam_id):
-    query = "UPDATE exams SET Status='Evaluated' WHERE Exam_ID=%s"
+    query = "UPDATE exams SET Status='Locked' WHERE Exam_ID=%s"
     mycursor.execute(query, (exam_id,))
     mydb.commit()
     return redirect(url_for('facultyResults'))
@@ -437,6 +444,7 @@ def view_results(exam_id):
 
 @app.route('/faculty/results')
 def facultyResults():
+    print(f"SELECT * FROM exams WHERE Course_ID={session['user'][9]} and Status='Unevaluated';")
     query = "SELECT * FROM exams WHERE Course_ID=%s and Status='Unevaluated';"
     mycursor.execute(query, (session['user'][9],))
     Exams_toEvaluate = mycursor.fetchall()
@@ -445,11 +453,17 @@ def facultyResults():
     mycursor.execute(query, (session['user'][9],))
     Evaluated = mycursor.fetchall()
 
+    
+    query = "SELECT * FROM exams WHERE Course_ID=%s and Status='Locked';"
+    mycursor.execute(query, (session['user'][9],))
+    Locked_Result = mycursor.fetchall()
+
+
     # query = "SELECT * FROM results WHERE Course_ID=%s';"
     # mycursor.execute(query, (session['user'][9],))
     # results = mycursor.fetchall()
     print("i am here")
-    return render_template('results.html', results=None, Exams_toEvaluate=Exams_toEvaluate, Evaluated=Evaluated)
+    return render_template('results.html', Exams_toEvaluate=Exams_toEvaluate, Evaluated=Evaluated,Locked_Result=Locked_Result)
 
 @app.route('/student')
 def student():
@@ -673,6 +687,124 @@ def delete_faculty(faculty_id):
 
     return redirect(url_for('adminFaculty'))
 
+@app.route('/admin/departments')
+def adminDepartments():
+    query = "SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS FacultyCount FROM department INNER JOIN faculty ON faculty.Department_ID = department.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE faculty.Status != 'Pending' GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
+    mycursor.execute(query)
+    active_departments = mycursor.fetchall()
+    active_department_ids = [x[0] for x in active_departments]
+    query = "SELECT * FROM `department` WHERE Department_ID NOT IN (SELECT department.Department_ID FROM department INNER JOIN faculty ON faculty.Department_ID = department.Department_ID WHERE faculty.Status != 'Pending' GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department);"
+    mycursor.execute(query)
+    inactive_departments = mycursor.fetchall()
+    return render_template('manage_department.html', active_departments=active_departments, inactive_departments=inactive_departments)
+
+
+@app.route('/admin/departments/add_department', methods=['POST'])
+def add_department():
+    department_id = request.form.get('department_id')
+    department_name = request.form.get('department_name')
+    head_of_department = request.form.get('head_of_department')
+    mycursor.execute("SELECT * FROM department WHERE Department_ID=%s", (department_id,))
+    if mycursor.fetchone():
+        return "Department ID already exists"
+    query = "INSERT INTO `department`(`Department_ID`, `Department_Name`, `Head_of_Department`) VALUES (%s, %s, %s)"
+    values = (department_id, department_name, head_of_department)
+    mycursor.execute(query, values)
+    mydb.commit()
+    print("Department added")
+    return redirect(url_for('adminDepartments'))
+
+@app.route('/admin/departments/update/<string:department_id>', methods=['GET', 'POST'])
+def update_department(department_id):
+    new_department_id = request.form.get("department_id")
+    new_department_name = request.form.get("department_name")
+    if new_department_id != department_id:
+        query = "SELECT * FROM department WHERE Department_ID=%s"
+        mycursor.execute(query, (new_department_id,))
+        department = mycursor.fetchone()
+        if department:
+            return "Can't update department id as it already exists"
+        else:
+            query = "UPDATE department SET Department_ID=%s, Department_Name=%s WHERE Department_ID=%s"
+            values = (new_department_id, new_department_name,  department_id)
+            mycursor.execute(query, values)
+            mydb.commit()
+    else:
+        query = "UPDATE department SET Department_Name=%s WHERE Department_ID=%s"
+        values = (new_department_name,  department_id)
+        mycursor.execute(query, values)
+        mydb.commit()
+    return redirect(url_for('adminDepartments'))
+        
+@app.route('/admin/departments/delete/<string:department_id>', methods=['POST'])
+def delete_department(department_id):
+    query = "DELETE FROM `department` WHERE Department_ID=%s"
+    mycursor.execute(query, (department_id,))
+    mydb.commit()
+    return redirect(url_for('adminDepartments'))
+
+
+
+@app.route('/admin/view_department/<string:department_id>', methods=['GET', 'POST'])
+def view_department(department_id):
+    query="SELECT department.Department_ID, department.Department_Name, department.Head_of_Department AS HOD_ID, CONCAT(hod.First_Name, ' ', COALESCE(hod.Middle_Name, ''), ' ', hod.Last_Name) AS HOD_Name, COUNT(faculty.Faculty_ID) AS Faculty_Count FROM department INNER JOIN faculty ON department.Department_ID = faculty.Department_ID LEFT JOIN faculty AS hod ON department.Head_of_Department = hod.Faculty_ID WHERE department.Department_ID = %s GROUP BY department.Department_ID, department.Department_Name, department.Head_of_Department, hod.First_Name, hod.Middle_Name, hod.Last_Name;"
+    mycursor.execute(query, (department_id,))
+    department = mycursor.fetchall()[0]
+    query = "SELECT Faculty_ID, CONCAT(First_Name, ' ', COALESCE(Middle_Name, ''), ' ', Last_Name) AS Name, Designation, Mail, Official_Mail FROM faculty WHERE Department_ID=%s"
+    mycursor.execute(query, (department_id,))
+    faculties= mycursor.fetchall()
+    return render_template('view_department.html', department=department, faculties=faculties)
+
+
+@app.route('/admin/view_department/<string:department_id>/appoint_HOD', methods=['GET', 'POST'])
+def appoint_HOD(department_id):
+    if request.method == 'POST':
+        faculty_id = request.form.get('hod_id')
+        query = "UPDATE department SET Head_of_Department=%s WHERE Department_ID=%s"
+        mycursor.execute(query, (faculty_id, department_id))
+        mydb.commit()
+        return redirect(url_for('view_department', department_id=department_id))
+    return redirect(url_for('view_department', department_id=department_id))
+
+
+@app.route('/admin/view_department/<string:department_id>/update_faculty/<int:faculty_id>', methods=['GET', 'POST'])
+def update_faculty_(department_id, faculty_id):
+    new_faculty_id = int(request.form.get("faculty_id"))
+    new_faculty_name = request.form.get("faculty_name")
+    new_faculty_designation = request.form.get("faculty_designation")
+    new_faculty_mail = request.form.get("faculty_mail")
+    new_faculty_official_mail = request.form.get("faculty_official_mail")
+    new_faculty_name=new_faculty_name.strip().split(' ')
+    if(len(new_faculty_name)==1):
+        FirstName=new_faculty_name[0]
+        LastName=''
+        MiddleName=''
+    elif(len(new_faculty_name)==2):
+        FirstName=new_faculty_name[0]
+        LastName=new_faculty_name[1]
+        MiddleName=''
+    else:
+        FirstName=new_faculty_name[0]
+        MiddleName=' '.join(new_faculty_name[1:-1])
+        LastName=new_faculty_name[-1]
+    if(new_faculty_id!=faculty_id):
+        query="SELECT * FROM faculty WHERE Faculty_ID=%s"
+        mycursor.execute(query,(new_faculty_id,))
+        faculty=mycursor.fetchone()
+        if faculty:
+            return "can't update faculty id as it already exists"
+        else:
+            query="UPDATE faculty SET  Faculty_ID=%s,First_Name=%s, Middle_Name=%s, Last_Name=%s, Designation=%s, Mail=%s, Official_Mail=%s WHERE Faculty_ID=%s"
+            values=(new_faculty_id,FirstName,MiddleName,LastName,new_faculty_designation,new_faculty_mail,new_faculty_official_mail,faculty_id)
+            mycursor.execute(query,values)
+            mydb.commit()
+    else:
+        query="UPDATE faculty SET  First_Name=%s, Middle_Name=%s, Last_Name=%s, Designation=%s, Mail=%s, Official_Mail=%s WHERE Faculty_ID=%s"
+        values=(FirstName,MiddleName,LastName,new_faculty_designation,new_faculty_mail,new_faculty_official_mail,faculty_id)
+        mycursor.execute(query,values)
+        mydb.commit()
+
+    return redirect(url_for('adminDepartments'))
 
 
 @app.route('/admin')
