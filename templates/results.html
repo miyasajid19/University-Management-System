@@ -99,10 +99,9 @@
     <main>
         <h1>Welcome to the Faculty Dashboard</h1>
         <p>Here you can manage exams, students, and view reports.</p>
-        {{results}}
         {{Evaluated}}
         {{Exams_toEvaluate}}
-
+        {{Locked_Result}}
         {% if Exams_toEvaluate %}
         <h2>Exams to Evaluate</h2>
         <table>
@@ -129,44 +128,19 @@
         </table>
         {% endif %}
 
-        {% if Evaluated %}
-        <h2>Evaluated Exams</h2>
+        {% if Locked_Result %}
+        <h2>Locked Results</h2>
         <table>
             <tr>
                 <th>Exam ID</th>
-                <th>Course ID</th>
-                <th>Course Name</th>
+                <th>Courese Name</th>
                 <th>Exam Date</th>
-                <th>Exam Time</th>
-                <th>Duration</th>
-                <th>Actions</th>
+                <th>Exam Duration ( hr.)</th>
+                <th>Exam Type</th>
+                <th>Venue</th>
+                <th>Action</th>
             </tr>
-            {% for exam in Evaluated %}
-            <tr>
-                <td>{{ exam[0] }}</td>
-                <td>{{ exam[1] }}</td>
-                <td>{{ exam[2] }}</td>
-                <td>{{ exam[3] }}</td>
-                <td>{{ exam[4] }}</td>
-                <td>{{ exam[5] }}</td>
-                <td><a href="{{ url_for('view_results', exam_id=exam[0]) }}">View Results</a></td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% endif %}
-
-        {% if results %}
-        <h2>Results</h2>
-        <table>
-            <tr>
-                <th>Student ID</th>
-                <th>Student Name</th>
-                <th>Exam ID</th>
-                <th>Course ID</th>
-                <th>Course Name</th>
-                <th>Grade</th>
-            </tr>
-            {% for result in results %}
+            {% for result in Locked_Result %}
             <tr>
                 <td>{{ result[0] }}</td>
                 <td>{{ result[1] }}</td>
@@ -174,6 +148,7 @@
                 <td>{{ result[3] }}</td>
                 <td>{{ result[4] }}</td>
                 <td>{{ result[5] }}</td>
+                <td><a href="{{ url_for('view_results', exam_id=result[0]) }}">View Results</a></td>
             </tr>
             {% endfor %}
         </table>
