@@ -7,6 +7,13 @@
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
         nav {
             background-color: #333;
             color: #fff;
@@ -39,33 +46,121 @@
             border-radius: 5px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
+    main {
+        padding: 20px;
+    }
 
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
+    h2 {
+        color: #333;
+    }
 
-        th,
-        td {
-            padding: 8px;
-            text-align: left;
-        }
+    table {
+        align-items: center;
+        margin: 0 auto;
+        /* width: 100%; */
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
 
-        th {
-            background-color: #f2f2f2;
-        }
+    table, th, td {
+        border: 1px solid #ddd;
+    }
 
-        .formattedInput {
-            width: 100%;
-            border: none;
-            outline: none;
-        }
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 0px;
+    }
+
+    footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+    }
+    a{
+        text-decoration: none;
+        background-color: #333;
+        color: white;
+        padding: 8px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }   
+    .add-department-table {
+        width: 50%;
+        margin: 0 auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .add-department-table th, .add-department-table td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    .add-department-table th {
+        background-color: #f2f2f2;
+    }
+
+    .add-department-table input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .add-department-table button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .add-department-table button:hover {
+        background-color: #45a049;
+    }
     </style>
 </head>
 
@@ -78,16 +173,13 @@
             <li><a href="/admin/departments">Courses</a></li>
             <li><a href="/admin/exams">Exams</a></li>
             <li><a href="/admin/fees">Fees</a></li>
-            <li><a href="/admin/faculty">faculty</a></li>
+            <li><a href="/admin/faculty">Faculty</a></li>
             <li><a href="/admin/departments" class="active">Departments</a></li>
             <li><a href="/admin/results">Results</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
-        {{active_departments}}
-        {{inactive_departments}}
         {% if active_departments %}
         <h2>Active Departments</h2>
         <table>
@@ -96,31 +188,25 @@
                 <th>Department Name</th>
                 <th>HOD ID</th>
                 <th>HOD Name</th>
-                <th>No. of faculty</th>
+                <th>No. of Faculty</th>
                 <th>Action</th>
             </tr>
             {% for department in active_departments %}
             <tr>
                 <form action="/admin/departments/update/{{ department[0] }}" method="post">
                     <td><input class="formattedInput" type="text" name="department_id" value="{{ department[0] }}"></td>
-                    <td><input class="formattedInput" type="text" name="department_name" value="{{ department[1] }}">
-                    </td>
+                    <td><input class="formattedInput" type="text" name="department_name" value="{{ department[1] }}"></td>
                     <td><input class="formattedInput" type="text" name="semester" value="{{ department[2] }}"></td>
                     <td><input class="formattedInput" type="text" name="credits" value="{{ department[3] }}"></td>
                     <td><input class="formattedInput" type="text" name="credits" value="{{ department[4] }}"></td>
                     <td>
+                        <a href="/admin/view_department/{{department[0]}}">View</a>
                         <button type="submit">Update</button>
+                        <a href="/admin/departments/delete/{{ department[0] }}">Delete</a>
+                    </td>
                 </form>
-                <form action="/admin/departments/delete/{{ department[0] }}" method="post" style="display:inline;">
-                    <button type="submit">Delete</button>
-                </form>
-                <form action="/admin/view_department/{{department[0]}}" method="post" style="display:inline;">
-                    <button type="submit">View</button>
-                </form>
-                </td>
             </tr>
             {% endfor %}
-
         </table>
         {% endif %}
 
@@ -137,33 +223,36 @@
             <tr>
                 <form action="/admin/departments/update/{{ department[0] }}" method="post">
                     <td><input class="formattedInput" type="text" name="department_id" value="{{ department[0] }}"></td>
-                    <td><input class="formattedInput" type="text" name="department_name" value="{{ department[1] }}">
-                    </td>
+                    <td><input class="formattedInput" type="text" name="department_name" value="{{ department[1] }}"></td>
                     <td><input class="formattedInput" type="text" name="semester" value="{{ department[2] }}"></td>
                     <td>
                         <button type="submit">Update</button>
+                        <a href="/admin/departments/delete/{{ department[0] }}">Delete</a>
+                    </td>
                 </form>
-                <form action="/admin/departments/delete/{{ department[0] }}" method="post" style="display:inline;">
-                    <button type="submit">Delete</button>
-                </form>
-                </td>
             </tr>
             {% endfor %}
-
         </table>
         {% endif %}
 
         <h2>Add New Department</h2>
-
         <form action="/admin/departments/add_department" method="post">
-            <label for="department_id">Department Code:</label>
-            <input type="text" id="department_id" name="department_id" required><br><br>
-
-            <label for="department_name">Department Name:</label>
-            <input type="text" id="department_name" name="department_name" required><br><br>
-
-            <button type="submit">Add</button>
-        </form>
+                <table class="add-department-table">
+                <tr>
+                    <th><label for="department_id">Department Code:</label></th>
+                    <td><input type="text" id="department_id" name="department_id" required></td>
+                </tr>
+                <tr>
+                    <th><label for="department_name">Department Name:</label></th>
+                    <td><input type="text" id="department_name" name="department_name" required></td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center;">
+                        <button type="submit">Add</button>
+                    </td>
+                </tr>
+            </table>
+            </form>
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>

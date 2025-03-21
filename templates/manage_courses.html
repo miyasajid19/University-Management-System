@@ -7,11 +7,24 @@
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
         nav {
             background-color: #333;
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         nav ul {
@@ -38,29 +51,112 @@
             background-color: #555;
             border-radius: 5px;
         }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        body {
+            padding-top: 60px; /* Adjust based on nav height */
+            padding-bottom: 40px; /* Adjust based on footer height */
+        }
+
+        main {
+            padding: 20px;
+            margin: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h2 {
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
+            margin-bottom: 1rem;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th,
         td {
-            padding: 8px;
+            padding: 12px 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
 
         th {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: 600;
         }
-        
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button,
+        a.button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover,
+        a.button:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        label {
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+    
+
+        #delete {
+            background-color: red;
+        }
     </style>
 </head>
 
@@ -79,63 +175,89 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
         {% if courses %}
         <h2>Courses</h2>
         <table>
-            <tr>
-                <th>Course ID</th>
-                <th>Course Name</th>
-                <th>Semester</th>
-                <th>Credits</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-            {% for course in courses %}
-            <tr>
-                <form action="/admin/course/update/{{ course[0] }}" method="post">
-                    <td><input type="text" name="course_id" value="{{ course[0] }}" style="border:none; outline:none;">
-                    </td>
-                    <td><input type="text" name="course_name" value="{{ course[1] }}"
-                            style="border:none; outline:none;"></td>
-                    <td><input type="text" name="semester" value="{{ course[2] }}" style="border:none; outline:none;">
-                    </td>
-                    <td><input type="text" name="credits" value="{{ course[3] }}" style="border:none; outline:none;">
-                    </td>
-                    <td><input type="text" name="price" value="{{ course[4] }}" style="border:none; outline:none;">
-                    </td>
-                    <td>
-                        <button type="submit">Update</button>
-                </form>
-                    <form action="/admin/course/delete/{{ course[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Delete</button>
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Semester</th>
+                    <th>Credits</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <form action="/admin/course/update/{{ course[0] }}" method="post">
+                        <td><input type="text" name="course_id" value="{{ course[0] }}"></td>
+                        <td><input type="text" name="course_name" value="{{ course[1] }}"></td>
+                        <td><input type="text" name="semester" value="{{ course[2] }}"></td>
+                        <td><input type="text" name="credits" value="{{ course[3] }}"></td>
+                        <td><input type="text" name="price" value="{{ course[4] }}"></td>
+                        <td>
+                            <button type="submit">Update</button>
                     </form>
-                </td>
-            </tr>
-            {% endfor %}
-
+                    <a href="/admin/course/delete/{{ course[0] }}" class="button " id="delete">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% endif %}
 
         <h2>Add New Course</h2>
         <form action="/admin/courses/add_course" method="post">
-            <label for="course_id">Course ID:</label>
-            <input type="text" id="course_id" name="course_id" required><br><br>
-
-            <label for="course_name">Course Name:</label>
-            <input type="text" id="course_name" name="course_name" required><br><br>
-
-            <label for="semester">Semester:</label>
-            <input type="text" id="semester" name="semester" required><br><br>
-
-            <label for="credits">Credits:</label>
-            <input type="number" id="credits" name="credits" required><br><br>
-
-            <label for="price">Price:</label>
-            <input type="number" id="price" name="price" required><br><br>
-
-            <button type="submit">Add Course</button>
+            <table>
+                <tr>
+                    <th>
+                        <label for="course_id">Course ID:</label>
+                    </th>
+                    <td>
+                        <input type="text" id="course_id" name="course_id" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="course_name">Course Name:</label>
+                    </th>
+                    <td>
+                        <input type="text" id="course_name" name="course_name" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="semester">Semester:</label>
+                    </th>
+                    <td>
+                        <input type="text" id="semester" name="semester" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="credits">Credits:</label>
+                    </th>
+                    <td>
+                        <input type="number" id="credits" name="credits" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <label for="price">Price:</label>
+                    </th>
+                    <td>
+                        <input type="number" id="price" name="price" required>
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan="2">
+                        <button type="submit">Add Course</button>
+                    </th>
+                </tr>
+            </table>
         </form>
     </main>
     <footer>

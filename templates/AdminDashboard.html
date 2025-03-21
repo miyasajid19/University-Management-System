@@ -6,12 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style>
+    <style> 
         nav {
             background-color: #333;
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         nav ul {
@@ -38,6 +43,22 @@
             background-color: #555;
             border-radius: 5px;
         }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        body {
+            padding-top: 60px; /* Adjust based on nav height */
+            padding-bottom: 40px; /* Adjust based on footer height */
+        }
     </style>
 </head>
 
@@ -56,29 +77,164 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
-        <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
-        <p>Your admin ID is: {{ session.user[0] }}</p>
-        <p>Your email is: {{ session.user[2] }}</p>
+        <section class="welcome">
+            <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
+            <p>Your admin ID is: {{ session.user[0] }} | Email: {{ session.user[2] }}</p>
+        </section>
 
-        <h2>Manage Users</h2>
-        <ul>
-            <li><a href="/admin/add_user">Add New User</a></li>
-            <li><a href="/admin/view_users">View All Users</a></li>
-            <li><a href="/admin/edit_user">Edit User Information</a></li>
-        </ul>
+        <section class="dashboard-grid">
+            <div class="grid-item">
+                <h2>Students</h2>
+                <ul>
+                    <li><a href="/admin/students">View Students</a></li>
+                    <li><a href="/admin/students">view Pending Applications</a></li>
+                    <li><a href="/admin/students">View Graduated</a></li>
+                    <li><a href="/admin/students">View Restricted Students</a></li>
+                </ul>
+            </div>
 
-        <h2>System Settings</h2>
-        <ul>
-            <li><a href="/admin/system_settings">Update System Settings</a></li>
-            <li><a href="/admin/backup">Backup Database</a></li>
-            <li><a href="/admin/logs">View System Logs</a></li>
-        </ul>
+            <div class="grid-item">
+                <h2>Courses</h2>
+                <ul>
+                    <li><a href="/admin/courses">Update Courses</a></li>
+                    <li><a href="/admin/courses">Delete Courses</a></li>
+                    <li><a href="/admin/courses">Add Course</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Exams</h2>
+                <ul>
+                    <li><a href="/admin/exams">View Exam</a></li>
+                    <li><a href="/admin/exams">Delete Exam</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Fees</h2>
+                <ul>
+                    <li><a href="/admin/fees">View Fees</a></li>
+                    <li><a href="/admin/fees">Add Fee</a></li>
+                    <li><a href="/admin/fees">Edit Fee</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Departments</h2>
+                <ul>
+                    <li><a href="/admin/departments">View Departments</a></li>
+                    <li><a href="/admin/departments">Add Department</a></li>
+                    <li><a href="/admin/departments">Update Department</a></li>
+                    <li><a href="/admin/departments">Delete Department</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Faculty</h2>
+                <ul>
+                    <li><a href="/admin/faculty">View Pending Applications</a></li>
+                    <li><a href="/admin/faculty">View Faculty</a></li>
+                    <li><a href="/admin/faculty">Update Faculty</a></li>
+                    <li><a href="/admin/faculty">Delete Faculty</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Results</h2>
+                <ul>
+                    <li><a href="/admin/results">View Results</a></li>
+                    <li><a href="/admin/results">Delete Result</a></li>
+                    <li><a href="/admin/results">Unlock Result</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>Users</h2>
+                <ul>
+                    <li><a href="/admin/add_user">Add New Admin</a></li>
+                    <li><a href="/admin/view_users">View All Admins</a></li>
+                    <li><a href="/admin/edit_user">Edit User Information</a></li>
+                </ul>
+            </div>
+
+            <div class="grid-item">
+                <h2>System</h2>
+                <ul>
+                    <li><a href="/admin/system_settings">System Settings</a></li>
+                    <li><a href="/admin/backup">Backup Database</a></li>
+                    <li><a href="/admin/logs">View System Logs</a></li>
+                </ul>
+            </div>
+        </section>
     </main>
+
     <footer>
         <p>&copy; 2025 University Management System</p>
     </footer>
+
+    <style>
+        main {
+            padding: 20px;
+        }
+
+        .welcome {
+            background-color: #f0f0f0;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .grid-item h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .grid-item ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .grid-item ul li {
+            margin-bottom: 8px;
+        }
+
+        .grid-item ul li a {
+            color: #007bff;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .grid-item ul li a:hover {
+            background-color: #e9ecef;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </body>
 
 </html>

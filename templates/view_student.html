@@ -53,12 +53,45 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 13px;
             text-align: left;
         }
 
         th {
             background-color: #f2f2f2;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            padding: 8px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+
+        .reject {
+            background-color: #DC3545;
+            /* A Bootstrap-like red */
+        }
+
+        .restrict {
+            background-color: #FFC107;
+            /* A warning yellow */
+            color: #000;
+            /* Ensure text is readable on yellow */
+        }
+
+        .graduate {
+            background-color: #28A745;
+            /* A success green */
+        }
+
+        .approve {
+            background-color: #17A2B8;
+            /* A teal color */
         }
     </style>
 </head>
@@ -77,7 +110,6 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{student}}
     <main>
         {% if student %}
         <h1>Student Details</h1>
@@ -152,29 +184,46 @@
             </tr>
             <tr>
                 <th>Action</th>
+                {% if student[-1] == 'Enrolled' %}
                 <td>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Graduate</button>
-                    </form>
-                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Restrict</button>
-                    </form>
+                    <a class="approve" href="/admin/approve_student/{{ student[0] }}">Approve</a>
+                    <a class="restrict" href="/admin/restrict_student/{{ student[0] }}">Restrict</a>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Remove</a>
+
                 </td>
+                {% elif student[-1] == 'Graduated' %}
+                <td>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
+                </td>
+                {% elif student[-1] == 'Restricted' %}
+                <td>
+                    <a class="approve" href="/admin/approve_student/{{ student[0] }}">Remove Restriction</a>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
+                </td>
+                {% else %}
+                <td>
+                    <a class="approve" href="/admin/approve_student/{{ student[0] }}">approve</a>
+                    <a class="reject" href="/admin/restrict_student/{{ student[0] }}">Reject</a>
+
+                </td>
+                {% endif %}
             </tr>
 
         </table>
         {% endif %}
 
         {%if courses%}
-        <h1>Student Courses</h1>
+        <h1>Enrolled Courses</h1>
         <table>
             <tr>
                 <th>Course ID</th>
                 <th>Course Name</th>
                 <th>Department</th>
                 <th>Semester</th>
-                <th>Year</th>
+                <th>Enrolled On</th>
+                {% if student[-1] != 'Graduated' %}
                 <th>Action</th>
+                {% endif %}
             </tr>
             {% for course in courses %}
             <tr>
@@ -183,12 +232,11 @@
                 <td>{{ course[2] }}</td>
                 <td>{{ course[3] }}</td>
                 <td>{{ course[4] }}</td>
+                {% if student[-1] != 'Graduated' %}
                 <td>
-                    <form action="/admin/view_student/{{student[0]}}/UnEnroll/{{course[0]}}" method="post"
-                        style="display:inline;">
-                        <button type="submit">UnEnroll</button>
-                    </form>
+                    <a class="reject" href="/admin/view_student/{{student[0]}}/UnEnroll/{{course[0]}}">UnEnroll</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
             {% endif %}

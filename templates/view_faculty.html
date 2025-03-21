@@ -119,11 +119,7 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
-        <h1>Welcome, {{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }}</h1>
-        <p>Your faculty ID is: {{ session.user[0] }}</p>
-        <p>Your email is: {{ session.user[4] }}</p>
         <br>
         <section class="details">
             <h2>Faculty Details</h2>

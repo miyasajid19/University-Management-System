@@ -12,6 +12,11 @@
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         nav ul {
@@ -38,7 +43,22 @@
             background-color: #555;
             border-radius: 5px;
         }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
 
+        body {
+            padding-top: 60px; /* Adjust based on nav height */
+            padding-bottom: 40px; /* Adjust based on footer height */
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -53,12 +73,37 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 20px;
             text-align: left;
         }
 
         th {
             background-color: #f2f2f2;
+        }
+        a{
+            text-decoration: none;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .view {
+            background-color: #007BFF; /* A professional blue */
+        }
+        .reject {
+            background-color: #DC3545; /* A Bootstrap-like red */
+        }
+        .restrict {
+            background-color: #FFC107; /* A warning yellow */
+            color: #000; /* Ensure text is readable on yellow */
+        }
+        .graduate {
+            background-color: #28A745; /* A success green */
+        }
+        .approve {
+            background-color: #17A2B8; /* A teal color */
         }
     </style>
 </head>
@@ -78,13 +123,8 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
-        <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
-        <p>Your admin ID is: {{ session.user[0] }}</p>
-        <p>Your email is: {{ session.user[2] }}</p>
-        {{students}}
-        {% if pending %}
+        {% if pending_students %}
         <h2>Pending Students</h2>
         <table>
             <tr>
@@ -97,7 +137,7 @@
                 <th>Expected Graduation</th>
                 <th>Action</th>
             </tr>
-            {% for student in pending %}
+            {% for student in pending_students %}
             <tr>
                 <td>{{ student[1] }}</td>
                 <td>{{ student[2] }}</td>
@@ -107,19 +147,16 @@
                 <td>{{ student[6] }}</td>
                 <td>{{ student[7] }}</td>
                 <td>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Approve</button>
-                    </form>
-                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Reject</button>
-                    </form>
+                    <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
+                    <a class="approve" href="/admin/approve_student/{{ student[0] }}">Approve</a>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Reject</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
         {% endif %}
 
-        {% if enrolled %}
+        {% if enrolled_students %}
         <h2>Enrolled Students</h2>
         <table>
             <tr>
@@ -132,7 +169,7 @@
                 <th>Expected Graduation</th>
                 <th>Action</th>
             </tr>
-            {% for student in enrolled %}
+            {% for student in enrolled_students %}
             <tr>
                 <td>{{ student[1] }}</td>
                 <td>{{ student[2] }}</td>
@@ -142,22 +179,17 @@
                 <td>{{ student[6] }}</td>
                 <td>{{ student[7] }}</td>
                 <td>
-                    <form action="/admin/view_student/{{ student[0]}}" method="post" style="display:inline;">
-                        <button type="submit">View</button>
-                    </form>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Graduate</button>
-                    </form>
-                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Restrict</button>
-                    </form>
+                    <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
+                    <a class="graduate" href="/admin/graduate_student/{{ student[0] }}">Graduate</a>
+                    <a class="restrict" href="/admin/restrict_student/{{ student[0] }}">Restrict</a>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Remove</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
         {% endif %}
 
-        {% if graduated %}
+        {% if graduted_students %}
         <h2>Graduated Students</h2>
         <table>
             <tr>
@@ -170,7 +202,7 @@
                 <th>Expected Graduation</th>
                 <th>Action</th>
             </tr>
-            {% for student in graduated %}
+            {% for student in graduted_students %}
             <tr>
                 <td>{{ student[1] }}</td>
                 <td>{{ student[2] }}</td>
@@ -180,16 +212,16 @@
                 <td>{{ student[6] }}</td>
                 <td>{{ student[7] }}</td>
                 <td>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
+                    <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
+
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
         {% endif %}
 
-        {% if restricted %}
+        {% if restricated_students %}
         <h2>Restricted Students</h2>
         <table>
             <tr>
@@ -202,7 +234,7 @@
                 <th>Expected Graduation</th>
                 <th>Action</th>
             </tr>
-            {% for student in restricted %}
+            {% for student in restricated_students %}
             <tr>
                 <td>{{ student[1] }}</td>
                 <td>{{ student[2] }}</td>
@@ -212,20 +244,17 @@
                 <td>{{ student[6] }}</td>
                 <td>{{ student[7] }}</td>
                 <td>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">view</button>
-                    </form>
-                    <form action="/admin/reject_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Remove Restriction</button>
-                    </form>
-                    <form action="/admin/approve_student/{{ student[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Delete</button>
-                    </form>
+                        <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
+                        <a class="approve" href="/admin/approve_student/{{ student[0] }}">Remove Restriction</a>
+                        <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
         {% endif %}</form>
+        {%if not pending_students and not enrolled_students and not graduted_students and not restricated_students%}
+        <h2>No Students Found</h2>
+        {%endif%}
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>

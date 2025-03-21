@@ -12,6 +12,11 @@
             color: #fff;
             padding: 10px 0;
             text-align: center;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         nav ul {
@@ -38,28 +43,81 @@
             background-color: #555;
             border-radius: 5px;
         }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
 
+        body {
+            padding-top: 60px; /* Adjust based on nav height */
+            padding-bottom: 40px; /* Adjust based on footer height */
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            padding: 8px;
+            font-size: 18px;
             text-align: left;
         }
 
-        th {
+        table th, table td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        table th {
             background-color: #f2f2f2;
         }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .view, .approve, .reject {
+            padding: 5px 10px;
+            text-decoration: none;
+            color: #fff;
+            border-radius: 5px;
+            margin-right: 5px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .view {
+            background-color: #4CAF50;
+        }
+
+        .approve {
+            background-color: #008CBA;
+        }
+
+        .reject {
+            background-color: #f44336;
+        }
+
+        .view:hover, .approve:hover, .reject:hover {
+            opacity: 0.8;
+        }
+        footer {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+    }
     </style>
 </head>
 
@@ -79,9 +137,7 @@
         </ul>
     </nav>
     <main>
-        <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
-        <p>Your admin ID is: {{ session.user[0] }}</p>
-        <p>Your email is: {{ session.user[2] }}</p>
+        
         {% if pending %}
         <h2>Pending Applications</h2>
         <table>
@@ -107,15 +163,9 @@
                 <td>{{ applicant[6] }}</td>
                 <td>{{ applicant[7] }}</td>
                 <td>
-                    <form action="/admin/faculty/view_faculty/{{ applicant[0]}}" method="post" style="display:inline;">
-                        <button type="submit">View</button>
-                    </form>
-                    <form action="/admin/faculty/approve_faculty/{{ applicant[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Approve</button>
-                    </form>
-                    <form action="/admin/faculty/reject_faculty/{{ applicant[0] }}" method="post" style="display:inline;">
-                        <button type="submit">Reject</button>
-                    </form>
+                    <a class="view" href="/admin/faculty/view_faculty/{{ applicant[0]}}">View</a>
+                    <a class="approve" href="/admin/faculty/approve_faculty/{{ applicant[0] }}">Approve</a>
+                    <a class="reject" href="/admin/faculty/reject_faculty/{{ applicant[0] }}">Reject</a>
                 </td>
             </tr>
             {% endfor %}
@@ -147,12 +197,10 @@
                 <td>{{ faculty[6] }}</td>
                 <td>{{ faculty[7] }}</td>
                 <td>
-                    <form action="/admin/faculty/view_faculty/{{ faculty[0] }}" method="post" style="display:inline;">
-                        <button type="submit">View</button>
-                    </form>
-                    <form action="/admin/faculty/delete_faculty/{{faculty[0]}}" method="post" style="display:inline;">
-                        <button type="submit">Remove</button>
-                    </form>
+                    <a class="view" href="/admin/faculty/view_faculty/{{ faculty[0] }}">View</a>
+                    <a class="reject" href="/admin/faculty/delete_faculty/{{faculty[0]}}">
+                        Remove
+                    </a>
                 </td>
             </tr>
             {% endfor %}

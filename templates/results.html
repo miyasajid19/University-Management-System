@@ -41,23 +41,28 @@
 
         main {
             padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
 
-        table,
-        th,
-        td {
+        table, th, td {
             border: 1px solid #ddd;
         }
 
-        th,
-        td {
-            padding: 8px;
+        th, td {
+            padding: 12px;
             text-align: left;
         }
 
@@ -73,6 +78,14 @@
             background-color: #f1f1f1;
         }
 
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
         footer {
             background-color: #333;
             color: #fff;
@@ -82,6 +95,7 @@
             width: 100%;
             bottom: 0;
         }
+        
     </style>
 </head>
 
@@ -97,11 +111,6 @@
         </ul>
     </nav>
     <main>
-        <h1>Welcome to the Faculty Dashboard</h1>
-        <p>Here you can manage exams, students, and view reports.</p>
-        {{Evaluated}}
-        {{Exams_toEvaluate}}
-        {{Locked_Result}}
         {% if Exams_toEvaluate %}
         <h2>Exams to Evaluate</h2>
         <table>
@@ -153,6 +162,9 @@
             {% endfor %}
         </table>
         {% endif %}
+        {%if not Exams_toEvaluate and not Locked_Result %}
+        <h1>No exams to evaluate or results to view.</h1>
+        {%endif%}
     </main>
 
     <footer>

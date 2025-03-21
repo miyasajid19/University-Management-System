@@ -66,6 +66,11 @@
             width: 100%;
             bottom: 0;
         }
+        h1 {
+            text-align: center;
+            color: #555;
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
@@ -79,18 +84,22 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
+        {% if students %}
         <table>
             <thead>
             <tr>
                 <th>S.No</th>
                 <th>Name</th>
+                <th>Gender</th>
                 <th>Course Name</th>
                 <th>Enrolled On</th>
+                <th>Work Mail</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
+                {{students}}
             {% set count = 1 %}
             {% for student in students %}
             <tr>
@@ -98,11 +107,17 @@
                 <td>{{ student[0] }}</td>
                 <td>{{ student[1] }}</td>
                 <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>{{ student[4] }}</td>
+                <td><a href="/faculty/students/unenroll/{{student[-1]}}">Unenroll</a></td>
                 {% set count = count + 1 %}
             </tr>
             {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <h1>No students enrolled in this course.</h1>
+        {% endif %}
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
