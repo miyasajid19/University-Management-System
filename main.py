@@ -3,15 +3,23 @@ import mysql.connector
 import datetime
 app = Flask(__name__)
 app.secret_key = '1234'
-
+import database_prerequisite  as setup
 # Database connection
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="University Management System"
-)
-
+try:
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="University Management System"
+    )
+except mysql.connector.Error as err:
+    setup.create_database_and_tables()
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="University Management System"
+    )
 
 
 mycursor = mydb.cursor()
