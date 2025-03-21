@@ -1211,6 +1211,86 @@ def delete_faculty_(department_id, faculty_id):
     # Otherwise, redirect back to the view_department page
     return redirect(url_for('view_department', department_id=department_id))
 
+@app.route('/admin/fees/delete/<int:fee_id>')
+def delete_fee(fee_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    query = "DELETE FROM fees WHERE Fee_ID=%s"
+    mycursor.execute(query, (fee_id,))
+    mydb.commit()
+    return redirect(url_for('adminFees'))
+
+@app.route('/admin/fees/update/<int:fee_id>', methods=['POST'])
+def update_fee(fee_id):
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        amount = request.form.get(f'amount_{fee_id}')
+        issued_date = request.form.get(f'issued_date_{fee_id}')
+        fee_type = request.form.get(f'type_{fee_id}')
+        payment_date = request.form.get(f'payment_date_{fee_id}')
+        status = request.form.get(f'status_{fee_id}')
+        if status not in ['Pending', 'Paid']:
+            return "Invalid status value"
+        payment_id = request.form.get(f'payment_id_{fee_id}')
+
+        print(amount, issued_date, fee_type, payment_date, status, payment_id)
+        query = """
+            UPDATE fees 
+            SET  Amount=%s, Issued_Date=%s, Type=%s, Payment_Date=%s, Status=%s, Payment_ID=%s 
+            WHERE Fee_ID=%s
+        """
+        values = (amount, issued_date, fee_type, payment_date, status, payment_id, fee_id)
+        mycursor.execute(query, values)
+        mydb.commit()
+        return redirect(url_for('adminFees'))
+    
+
+@app.route('/admin/fees/filter/', methods=['POST'])
+def filter_fees():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    filters = {}
+    if request.form.get('fee_id_check'):
+        filters['Fee_ID'] = request.form.get('fee_id')
+    if request.form.get('student_id_check'):
+        filters['Student_ID'] = request.form.get('student_id')
+    if request.form.get('exam_id_check'):
+        filters['Exam_ID'] = request.form.get('exam_id')
+    if request.form.get('course_id_check'):
+        filters['Course_ID'] = request.form.get('course_id')
+    if request.form.get('amount_check'):
+        filters['Amount'] = request.form.get('amount')
+    if request.form.get('issued_date_check'):
+        filters['Issued_Date'] = request.form.get('issued_date')
+    if request.form.get('type_check'):
+        filters['Type'] = request.form.get('type')
+    if request.form.get('payment_date_check'):
+        filters['Payment_Date'] = request.form.get('payment_date')
+    if request.form.get('status_check'):
+        filters['Status'] = request.form.get('status')
+    if request.form.get('payment_id_check'):
+        filters['Payment_ID'] = request.form.get('payment_id')
+
+    query = "SELECT * FROM fees WHERE "
+    if not filters:
+        return redirect(url_for('adminFees'))
+    query += " AND ".join([f"{key}=%s" for key in filters.keys()])
+    mycursor.execute(query, tuple(filters.values()))
+    fees = mycursor.fetchall()
+    return render_template('manage_fees.html', fees=fees)
+    
+
+
+
+@app.route('/admin/fees')
+def adminFees():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    query = "SELECT * FROM fees"
+    mycursor.execute(query)
+    fees = mycursor.fetchall()
+    return render_template('manage_fees.html', fees=fees)
 @app.route('/admin/exams')
 def adminExams():
     if 'user' not in session:
