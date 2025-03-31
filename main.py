@@ -2357,7 +2357,7 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('main'))    
 
-@app.route('/login_user', methods=['GET', 'POST'])
+@app.route('/login_user', methods=['POST'])
 def signin():
     if request.method == 'POST':
         errors={}
