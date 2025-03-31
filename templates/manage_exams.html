@@ -5,138 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style>
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
-            border-radius: 5px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .formattedInput {
-            width: 100%;
-            border: none;
-            outline: none;
-        }
-
-        .btn-submit {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-
-        .btn-submit:hover {
-            background-color: #45a049;
-        }
-
-        .btn-danger {
-            display: inline-block;
-            background-color: #f44336;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
-        }
-
-        .btn-danger:hover {
-            background-color: #da190b;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-            left: 0;
-        }
-
-        a {
-            text-decoration: none;
-            color: white;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-
-        .select {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            box-sizing: border-box;
-            border: none;
-            border-radius: 5px;
-        }
-
-        main {
-            padding-top: 60px; /* Adjust based on nav height */
-            padding-bottom: 40px; /* Adjust based on footer height */
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </head>
 
 <body>
@@ -154,8 +24,27 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
     <main>
+        {% if query %}
+        <h1 class="query">{{ query }}</h1>
+        {% endif %}
+
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{ queries[query] }}</h1>
+        {% endfor %}
+        {% endif %}
+        {% if message_success %}
+        <h1 class="success">{{ message_success }}</h1>
+        {% endif %}
+        {% if message_danger %}
+        <h1 class="error">{{ message_danger }}</h1>
+        {% endif %}
+        {% if errors %}
+        {% for error in errors %}
+        <h1 class="error">{{ errors[error] }}</h1>
+        {% endfor %}
+        {% endif %}
         {% if upcoming_exams %}
         <h1>Upcoming Exams</h1>
         <table>
@@ -269,7 +158,7 @@
 
                     <a href="{{ url_for('view_results_admin', exam_id=exam[0]) }}" class="btn-submit">view</a>
                     <a href="{{ url_for('delete_exam_admin', exam_id=exam[0]) }}" class="btn-danger">Delete</a>
-            </td>
+                </td>
             </tr>
             {% endfor %}
         </table>
@@ -280,6 +169,8 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
 
