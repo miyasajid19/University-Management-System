@@ -5,120 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style>
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
 
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
-            border-radius: 5px;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        body {
-            padding-top: 60px; /* Adjust based on nav height */
-            padding-bottom: 40px; /* Adjust based on footer height */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 18px;
-            text-align: left;
-        }
-
-        table th, table td {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-        }
-
-        table th {
-            background-color: #f2f2f2;
-        }
-
-        table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        table tr:hover {
-            background-color: #f1f1f1;
-        }
-
-        .view, .approve, .reject {
-            padding: 5px 10px;
-            text-decoration: none;
-            color: #fff;
-            border-radius: 5px;
-            margin-right: 5px;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .view {
-            background-color: #4CAF50;
-        }
-
-        .approve {
-            background-color: #008CBA;
-        }
-
-        .reject {
-            background-color: #f44336;
-        }
-
-        .view:hover, .approve:hover, .reject:hover {
-            opacity: 0.8;
-        }
-        footer {
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        padding: 10px 0;
-        position: fixed;
-        width: 100%;
-        bottom: 0;
-    }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </head>
 
 <body>
@@ -137,7 +26,20 @@
         </ul>
     </nav>
     <main>
-        
+        {%if query %}
+        <h1 class="query">{{query}}</h1>
+        {% endif %}
+        {% if queries %}
+        {% for q in queries %}
+        <h1 class="query">{{queries[q]}}</h1>
+        {% endfor %}
+        {% endif %}
+        {% if message_success %}
+        <h1 class="success">{{message_success}}</h1>
+        {% endif %}
+        {% if message_danger %}
+        <h1 class="error">{{message_danger}}</h1>
+        {% endif %}
         {% if pending %}
         <h2>Pending Applications</h2>
         <table>
@@ -209,6 +111,7 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
     </footer>
 </body>
 
