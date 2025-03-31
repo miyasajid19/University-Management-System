@@ -5,68 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style> 
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
-            border-radius: 5px;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        body {
-            padding-top: 60px; /* Adjust based on nav height */
-            padding-bottom: 40px; /* Adjust based on footer height */
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </head>
 
 <body>
     <nav>
         <ul>
             <li><a href="/">UMS</a></li>
-            <li><a href="/admin/dashboard" class="active">Dashboard</a></li>
+            <li><a href="/admin" class="active">Dashboard</a></li>
             <li><a href="/admin/students">Students</a></li>
             <li><a href="/admin/courses">Courses</a></li>
             <li><a href="/admin/exams">Exams</a></li>
@@ -77,7 +24,13 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    <main>
+    <main class="main_Admin">
+        {%if message_success%}
+        <h1 class="success">{{message_success}}</h1>
+        {%endif%}
+        {% if message_danger%}
+        <h1 class="error">{{message_danger}}</h1>
+        {%endif%}
         <section class="welcome">
             <h1>Welcome, Admin {{ (session.user[1]).upper() }}</h1>
             <p>Your admin ID is: {{ session.user[0] }} | Email: {{ session.user[2] }}</p>
@@ -152,18 +105,17 @@
             <div class="grid-item">
                 <h2>Users</h2>
                 <ul>
-                    <li><a href="/admin/add_user">Add New Admin</a></li>
-                    <li><a href="/admin/view_users">View All Admins</a></li>
-                    <li><a href="/admin/edit_user">Edit User Information</a></li>
+                    <li><a href="/admin/{{session.user[0]}}">Add New Admin</a></li>
+                    <li><a href="/admin/{{session.user[0]}}">View All Admins</a></li>
+                    <li><a href="/admin/{{session.user[0]}}">Edit User Information</a></li>
                 </ul>
             </div>
 
             <div class="grid-item">
                 <h2>System</h2>
                 <ul>
-                    <li><a href="/admin/system_settings">System Settings</a></li>
-                    <li><a href="/admin/backup">Backup Database</a></li>
-                    <li><a href="/admin/logs">View System Logs</a></li>
+                    <li><a href="/admin/create_tables">Create Tables</a></li>
+                    <li><a href="/admin/insert_initial_data">Insert Dummy Data</a></li>
                 </ul>
             </div>
         </section>
@@ -171,70 +123,9 @@
 
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
-
-    <style>
-        main {
-            padding: 20px;
-        }
-
-        .welcome {
-            background-color: #f0f0f0;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .grid-item {
-            background-color: #fff;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .grid-item h2 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        .grid-item ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .grid-item ul li {
-            margin-bottom: 8px;
-        }
-
-        .grid-item ul li a {
-            color: #007bff;
-            text-decoration: none;
-            display: block;
-            padding: 8px 12px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-
-        .grid-item ul li a:hover {
-            background-color: #e9ecef;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
 </body>
 
 </html>
