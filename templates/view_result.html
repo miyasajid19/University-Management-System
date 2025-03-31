@@ -112,10 +112,22 @@
         button[type="submit"][formaction*="grade"]:hover {
             background-color: #007bb5;
         }
+
         p {
             font-size: 16px;
             line-height: 1.5;
             margin: 10px 0;
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
         }
     </style>
 </head>
@@ -132,6 +144,11 @@
         </ul>
     </nav>
     <main>
+        {% if queries %}
+        {% for query in queries%}
+        <h1 class="query">{{queries[query]}}</h1>
+        {%endfor%}
+        {%endif%}
         <h2>Evaluated</h2>
         <p>Exam ID: {{ exam_id }}</p>
         <p>Course ID: {{ session.user[-3] }}</p>
@@ -164,7 +181,28 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
