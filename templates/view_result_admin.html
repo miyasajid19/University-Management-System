@@ -5,119 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }} | Result Evaluation</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style>
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
-            border-radius: 5px;
-        }
-
-        main {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background-color: #333;
-            color: #fff;
-            position: relative;
-            width: 100%;
-            bottom: 0;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        button[type="submit"][formaction*="delete"] {
-            background-color: #f44336;
-        }
-
-        button[type="submit"][formaction*="delete"]:hover {
-            background-color: #e53935;
-        }
-
-        button[type="submit"][formaction*="evaluateall"],
-        button[type="submit"][formaction*="grade"] {
-            background-color: #008CBA;
-        }
-
-        button[type="submit"][formaction*="evaluateall"]:hover,
-        button[type="submit"][formaction*="grade"]:hover {
-            background-color: #007bb5;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.5;
-            margin: 10px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </head>
 
 <body>
@@ -136,6 +25,11 @@
         </ul>
     </nav>
     <main>
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{ queries[query] }}</h1>
+        {% endfor %}
+        {% endif %}
         <h2>Evaluated</h2>
         <p>Exam ID: {{ exam_id }}</p>
         <p>Course ID: {{ session.user[-3] }}</p>
@@ -168,6 +62,8 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
 
