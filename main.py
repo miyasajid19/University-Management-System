@@ -1,5 +1,4 @@
 from flask import Flask, request, render_template, redirect, url_for, session,render_template_string,send_from_directory
-import mysql.connector
 import datetime
 app = Flask(__name__)
 app.secret_key = '1234'
