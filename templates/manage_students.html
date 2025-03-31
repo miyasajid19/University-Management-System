@@ -5,107 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
-    <style>
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px 0;
-            text-align: center;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
-
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
-        }
-
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
-            border-radius: 5px;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        body {
-            padding-top: 60px; /* Adjust based on nav height */
-            padding-bottom: 40px; /* Adjust based on footer height */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            padding: 20px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-        a{
-            text-decoration: none;
-            color: white;
-            padding: 8px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-        .view {
-            background-color: #007BFF; /* A professional blue */
-        }
-        .reject {
-            background-color: #DC3545; /* A Bootstrap-like red */
-        }
-        .restrict {
-            background-color: #FFC107; /* A warning yellow */
-            color: #000; /* Ensure text is readable on yellow */
-        }
-        .graduate {
-            background-color: #28A745; /* A success green */
-        }
-        .approve {
-            background-color: #17A2B8; /* A teal color */
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </head>
 
 <body>
@@ -124,6 +25,22 @@
         </ul>
     </nav>
     <main>
+        {% if query%}
+        <h1 class="query">{{query}}</h1>
+        {%endif%}
+
+        {% if queries %}
+        {%for query in queries%}
+        <h1 class="query">{{queries[query]}}</h1>
+        {%endfor%}
+        {%endif%}
+        {% if message_success%}
+        <h1 class="success">{{message_success}}</h1>
+        {%endif%}
+        {% if message_danger%}
+        <h1 class="error">{{message_danger}}</h1>
+        {%endif%}
+
         {% if pending_students %}
         <h2>Pending Students</h2>
         <table>
@@ -244,9 +161,9 @@
                 <td>{{ student[6] }}</td>
                 <td>{{ student[7] }}</td>
                 <td>
-                        <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
-                        <a class="approve" href="/admin/approve_student/{{ student[0] }}">Remove Restriction</a>
-                        <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
+                    <a class="view" href="/admin/view_student/{{ student[0] }}">View</a>
+                    <a class="approve" href="/admin/remove_restriction/{{ student[0] }}">Remove Restriction</a>
+                    <a class="reject" href="/admin/reject_student/{{ student[0] }}">Delete</a>
                 </td>
             </tr>
             {% endfor %}
@@ -258,7 +175,8 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
-
 </html>
