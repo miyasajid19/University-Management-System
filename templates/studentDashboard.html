@@ -7,11 +7,23 @@
     <title>{{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }} | Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.6;
+        }
+
         nav {
             background-color: #333;
             color: #fff;
-            padding: 10px 0;
-            text-align: center;
+            padding: 12px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         nav ul {
@@ -20,6 +32,7 @@
             margin: 0;
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         nav ul li {
@@ -30,52 +43,55 @@
             color: #fff;
             text-decoration: none;
             padding: 10px 15px;
-            transition: background-color 0.3s ease;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
-        nav ul li a:hover,
+        nav ul li a:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+
         nav ul li a.active {
             background-color: #555;
-            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        body {
-            width: 80%;
+        main {
+            padding: 25px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        form input,
-        select {
-            width: 90%;
-            padding: 5px;
-            margin: 5px 0;
-            border: 0px;
-        }
-
-        .checkbox {
-            width: 10%;
+        h1,
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th,
         td {
-            padding: 10px;
+            padding: 15px;
             text-align: left;
+            border-bottom: 1px solid #eee;
         }
 
         th {
             background-color: #f2f2f2;
+            font-weight: 600;
+            color: #555;
+            width: 30%;
         }
 
         tr:nth-child(even) {
@@ -86,17 +102,48 @@
             background-color: #f1f1f1;
         }
 
+        form input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+            font-size: 15px;
+        }
+
+        form input:focus,
+        select:focus {
+            border-color: #333;
+            box-shadow: 0 0 8px #555;
+            outline: none;
+        }
+
+        .checkbox {
+            width: 10%;
+        }
+
         button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
             border: none;
+            padding: 12px 25px;
             border-radius: 5px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 500;
+            display: block;
+            margin: 20px auto 0;
+            width: 200px;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #555;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px);
         }
 
         ul {
@@ -108,36 +155,81 @@
         .recent_exams,
         .evaluated_results,
         .locked_results {
-            background-color: #f9f9f9;
-            margin: 10px 0;
-            padding: 10px;
-            border-left: 5px solid #4CAF50;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+            border-left-width: 5px;
+            border-left-style: solid;
         }
 
         .upcoming_exams {
-            border-color: #ff9800;
+            border-left-color: #3949ab;
+            background-color: #f5f7ff;
         }
 
         .recent_exams {
-            border-color: #2196F3;
+            border-left-color: #ff9800;
+            background-color: #fff9f0;
         }
 
         .evaluated_results {
-            border-color: #9C27B0;
+            border-left-color: #9C27B0;
+            background-color: #f9f0ff;
         }
 
         .locked_results {
-            border-color: #f44336;
+            border-left-color: #e53935;
+            background-color: #fff5f5;
+        }
+
+        .upcoming_exams:hover,
+        .recent_exams:hover,
+        .evaluated_results:hover,
+        .locked_results:hover {
+            transform: translateX(5px);
         }
 
         footer {
+            text-align: center;
+            padding: 20px 0;
             background-color: #333;
             color: #fff;
-            text-align: center;
-            padding: 10px 0;
-            position: relative;
-            bottom: 0;
+            margin-top: 40px;
+            box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
         }
     </style>
 </head>
@@ -154,6 +246,27 @@
         </ul>
     </nav>
     <main>
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{ queries[query] }}</h1>
+        {% endfor %}
+        {% endif %}
+        {% if message %}
+        <p class="success">{{ message }}</p>
+        {% endif %}
+
+        {% if errors!='{}'%}
+        <ul>
+
+            <ul>
+                {% for key, error in errors.items() %}
+                <li class="error">{{ error }}</li>
+                {% endfor %}
+            </ul>
+
+
+        </ul>
+        {% endif %}
         <h1>Welcome, {{ (session.user[1] + ' ' + session.user[2] + ' ' + session.user[3]).upper() }}</h1>
         <h2>Student Details</h2>
         <form action="/student/update/{{student[0]}}/" method="post">
@@ -164,21 +277,23 @@
                 </tr>
                 <tr>
                     <th>Name</th>
-                    <td><input type="text" name="studentName" value="{{student[1]}}" placeholder="Enter Full Name "></td>
+                    <td><input type="text" name="studentName" value="{{student[1]}}" placeholder="Enter Full Name ">
+                    </td>
                 </tr>
                 <tr>
                     <th>Address</th>
-                    <td><input type="text" name="Address" value="{{student[2]}}"   placeholder="Address(Street,District,State,Country)"></td>
+                    <td><input type="text" name="Address" value="{{student[2]}}"
+                            placeholder="Address(Street,District,State,Country)"></td>
                 </tr>
                 <tr>
                     <th>Gender</th>
                     <td>
                         <select name="gender" id="gender">
                             <option value="" disabled>Select</option>
-                            <option value="Male" {% if student[3]=='Male' %} selected disabled{% endif %} >Male</option>
-                            <option value="Female" {% if student[3]=='Female' %} selected disabled{% endif %} >Female
+                            <option value="Male" {% if student[3]=='Male' %} selected disabled{% endif %}>Male</option>
+                            <option value="Female" {% if student[3]=='Female' %} selected disabled{% endif %}>Female
                             </option>
-                            <option value="Others" {% if student[3]=='Others' %} selected disabled{% endif %} >Others
+                            <option value="Others" {% if student[3]=='Others' %} selected disabled{% endif %}>Others
                             </option>
                         </select>
                     </td>
@@ -201,12 +316,14 @@
                 </tr>
                 <tr>
                     <th>Work Mail</th>
-                    <td><input type="email" name="WorkMail"value="{{student[6]}}"></td>
+                    <td><input type="email" name="WorkMail" value="{{student[6]}}" readonly></td>
                 </tr>
                 <tr>
                     <th>Password</th>
                     <td><input type="password" name="password" id="password" value="{{student[7]}}"><br>
-                        <input type="checkbox" class='checkbox' onclick="togglePassword()" style="margin-right: -10px;"> Show Password</input></td>
+                        <input type="checkbox" class='checkbox' onclick="togglePassword()" style="margin-right: -10px;">
+                        Show Password</input>
+                    </td>
                 </tr>
                 <tr>
                     <th>Enrollment Year</th>
@@ -216,7 +333,7 @@
                     <th>Graduation Year</th>
                     <td><input type="text" value="{{student[9]}}" readonly></td>
                 </tr>
-            
+
                 <tr colspan="2">
                     <td>
                         <button type="submit">Update</button>
@@ -224,6 +341,7 @@
                 </tr>
             </table>
         </form>
+        {% if upcoming_exams %}
         <h2>Upcoming Exams</h2>
         <ul>
             {%for exam in upcoming_exams%}
@@ -235,6 +353,10 @@
             {%endfor%}
 
         </ul>
+        {% else %}
+        <h2 class="upcoming_exams">No Upcoming Exams</h2>
+        {% endif %}
+        {% if recent_exams %}
         <h2>Recent Exams</h2>
         <ul>
             {%for exam in recent_exams%}
@@ -246,6 +368,10 @@
             {%endfor%}
 
         </ul>
+        {% else %}
+        <h2 class="recent_exams">No Recent Exams</h2>
+        {% endif %}
+        {% if evaluated_results %}
         <h2>Evaluated Results</h2>
         <ul>
 
@@ -258,9 +384,12 @@
             {%endfor%}
 
         </ul>
+        {%else%}
+        <h2 class="evaluated_results">No Results Evaluated</h2>
+        {%endif%}
+        {% if locked_results %}
         <h2>Published Results</h2>
         <ul>
-
             {%for exam in locked_results%}
             <li class="locked_results">The<b> {{exam[0]}} ({{exam[1]}})'s</b> exam, categorized as <b>{{exam[2]}}</b>,
                 was a
@@ -270,9 +399,14 @@
             {%endfor%}
 
         </ul>
+        {%else%}
+        <h2 class="locked_results">No Results Published</h2>
+        {%endif%}
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
 <script>
@@ -284,6 +418,23 @@
             passwordField.type = "password";
         }
     }
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
 </script>
 
 </html>
