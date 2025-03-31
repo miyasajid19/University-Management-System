@@ -8,7 +8,25 @@
     <link rel="stylesheet" href="{{url_for('static', filename='css/nav_style.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='css/register_style.css')}}">
     <style>
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
+        }
 
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+        }
     </style>
     <title>UMS | Home</title>
 </head>
@@ -29,66 +47,127 @@
             <label for="userType">Select User Type</label>
             <select name="userType" id="userType" onchange="toggleForm()">
                 <option value="" disabled selected>Select User Type</option>
-                <option value="student">Student</option>
-                <option value="faculty">Faculty</option>
+                <option value="student" {% if userType=='student' %}selected{%endif%}>Student</option>
+                <option value="faculty" {% if userType=='faculty' %}selected{%endif%}>Faculty</option>
             </select>
         </div>
+
         <div id="studentForm" style="display: none;">
-            <form action="/register" method="POST">
-                <input type="hidden" name="userType" id="studentUserType" value="">
+            <form action="/register/student" method="POST">
                 <div>
                     <label for="firstname">Name</label>
                     <div>
-                        <input type="text" name="firstname" id="studentFirstname" placeholder="Firstname">
-                        <input type="text" name="middlename" id="studentMiddlename" placeholder="Middlename">
-                        <input type="text" name="lastname" id="studentLastname" placeholder="Lastname">
+                        <input type="text" name="firstname" id="studentFirstname" placeholder="Firstname"
+                            value="{{firstname}}">
+                        <input type="text" name="middlename" id="studentMiddlename" placeholder="Middlename"
+                            value="{{middlename}}">
+                        <input type="text" name="lastname" id="studentLastname" placeholder="Lastname"
+                            value="{{lastname}}">
                     </div>
+                </div>
+                <div>
+                    {% if firstname_error %}
+                    <div class="error">{{ firstname_error }}</div>
+                    {% endif %}
+                    {% if middlename_error %}
+                    <div class="error">{{ middlename_error }}</div>
+                    {% endif %}
+                    {% if lastname_error %}
+                    <div class="error">{{ lastname_error }}</div>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="dob">Date of Birth</label>
-                    <input type="date" name="dob" id="dob">
+                    <input type="date" name="dob" id="dob" value="{{dob}}">
+                </div>
+                <div>
+                    {%if dob_error%}
+                    <div class="error">{{dob_error}}</div>
+                    {%endif%}
                 </div>
                 <div>
                     <label for="gender">Gender</label>
-                    <select name="gender">
+                    <select name="gender" id="gender">
                         <option value="" selected>Select gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Others">Others</option>
+                        <option value="male" {% if gender=='male' %}selected{% endif %}>Male</option>
+                        <option value="female" {% if gender=='female' %}selected{% endif %}>Female</option>
+                        <option value="others" {% if gender=='others' %}selected{% endif %}>Others</option>
                     </select>
                 </div>
                 <div>
-                    <label for="address">Address</label>
-                    <div>
-                        <input type="text" name="street" id="street" placeholder="Street">
-                        <input type="text" name="district" id="district" placeholder="district">
-                        <input type="text" name="state" id="state" placeholder="State">
-                        <input type="text" name="country" id="country" placeholder="Country">
+                    {% if gender_error%}
+                    <div class="error">{{gender_error}}
+                        {%endif%}
                     </div>
-                </div>
-                <div>
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="studentEmail" placeholder="Email">
-                </div>
-                <div>
-                    <label for="phone">Phone Number</label>
-                    <input type="text" name="phone" id="studentPhone" placeholder="Phone Number">
-                </div>
-                <div>
-                    <button type="submit">Register as Student</button>
-                </div>
+                    <div>
+                        <label for="address">Address</label>
+                        <div>
+                            <input type="text" name="street" id="street" placeholder="Street" value="{{street}}">
+                            <input type="text" name="district" id="district" placeholder="district"
+                                value="{{district}}">
+                            <input type="text" name="state" id="state" placeholder="State" value="{{state}}">
+                            <input type="text" name="country" id="country" placeholder="Country" value="{{country}}">
+                        </div>
+                    </div>
+                    <div>
+                        {% if street_error %}
+                        <h1 class="error">{{street_error}}</h1>
+                        {%endif%}
+                        {% if district_error %}
+                        <h1 class="error">{{district_error}}</h1>
+                        {%endif%}
+                        {% if state_error %}
+                        <h1 class="error">{{state_error}}</h1>
+                        {%endif%}
+                        {% if country_error %}
+                        <h1 class="error">{{country_error}}</h1>
+                        {%endif%}
+                    </div>
+                    <div>
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="studentEmail" placeholder="Email" value="{{email}}">
+                    </div>
+                    <div>
+                        {% if email_error %}
+                        <div class="error">{{ email_error }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="phone">Phone Number</label>
+                        <input type="text" name="phone" id="studentPhone" placeholder="Phone Number" value="{{phone}}">
+                    </div>
+                    <div>
+                        {% if phone_error %}
+                        <div class="error">{{ phone_error }}</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button type="submit">Register as Student</button>
+                    </div>
             </form>
         </div>
         <div id="facultyForm" style="display: none;">
-            <form action="/register" method="POST">
-                <input type="hidden" name="userType" id="facultyUserType" value="">
+            <form action="/register/faculty" method="POST">
                 <div>
                     <label for="name">Name</label>
                     <div>
-                        <input type="text" name="firstname" id="firstname" placeholder="Firstname">
-                        <input type="text" name="middlename" id="middlename" placeholder="Middlename">
-                        <input type="text" name="lastname" id="lastname" placeholder="Lastname">
+                        <input type="text" name="firstname" id="firstname" placeholder="Firstname"
+                            value="{{firstname}}">
+                        <input type="text" name="middlename" id="middlename" placeholder="Middlename"
+                            value="{{middlename}}">
+                        <input type="text" name="lastname" id="lastname" placeholder="Lastname" value="{{lastname}}">
                     </div>
+                </div>
+                <div>
+                    {% if firstname_error %}
+                    <div class="error">{{ firstname_error }}</div>
+                    {% endif %}
+                    {% if middlename_error %}
+                    <div class="error">{{ middlename_error }}</div>
+                    {% endif %}
+                    {% if lastname_error %}
+                    <div class="error">{{ lastname_error }}</div>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="facultyCourseName">Course</label>
@@ -97,16 +176,19 @@
                             onchange="syncCourseID()">
                             <option value="" selected disabled>Select Course Name</option>
                             {%for course in courses %}
-                            <option value="{{course[1]}}">{{course[1]}}</option>
+                            <option value="{{course[1]}}" {% if facultyCourseName==course[1] %}selected{% endif %}>
+                                {{course[1]}}</option>
                             {%endfor%}
-                            <!-- Add more courses as needed -->
                         </select>
                         <select name="facultyCourseID" id="facultyCourseID" style="flex: 1;"
                             onchange="syncCourseName()">
+
                             <option value="" selected disabled>Select Course ID</option>
-                            {%for course in courses %}
-                            <option value="{{course[0]}}">{{course[0]}}</option>
-                            {%endfor%}
+                            {% for course in courses %}
+                            <option value="{{course[0]}}" {% if facultyCourseID==course[0] %}selected{% endif %}>
+                                {{course[0]}}</option>
+                            <a href="">{{facultyCourseID==course[0]}}</a>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -117,42 +199,70 @@
                             onchange="syncDepartmentID()">
                             <option value="" selected disabled>Select Department Name</option>
                             {%for department in departments %}
-                            <option value="{{department[1]}}">{{department[1]}}</option>
+                            <option value="{{department[1]}}" {% if facultyDepartmentName==department[1] %}selected{%
+                                endif %}>{{department[1]}}</option>
                             {%endfor%}
                         </select>
                         <select name="facultyDepartmentID" id="facultyDepartmentID" style="flex: 1;"
                             onchange="syncDepartmentName()">
                             <option value="" selected disabled>Select Department ID</option>
                             {%for department in departments %}
-                            <option value="{{department[0]}}">{{department[0]}}</option>
+                            <option value="{{department[0]}}" {% if facultyDepartmentID==department[0] %}selected{%
+                                endif %}>{{department[0]}}</option>
                             {%endfor%}
                         </select>
                     </div>
                 </div>
                 <div>
                     <label for="email">Email</label>
-                    <input type="email" name="email" id="email" placeholder="Email">
+                    <input type="email" name="email" id="email" placeholder="Email" value="{{email}}">
+                </div>
+                <div>
+                    {% if email_error %}
+                    <div class="error">{{ email_error }}</div>
+                    {% endif %}
                 </div>
                 <div>
                     <label for="facultyPhone">Phone Number</label>
-                    <input type="text" name="phone" id="facultyPhone" placeholder="Phone Number">
+                    <input type="text" name="phone" id="facultyPhone" placeholder="Phone Number" value="{{phone}}">
                 </div>
                 <div>
-                    <label for="Designation">Apply For</label>
-                    <select name="Designation" id="Designation">
-                        <option value="" selected disabled>Select</option>
-                        <option value="Professor">Professor</option>
-                        <option value="Teaching">Teaching Assistant</option>
-                        <option value="Lab Assistant">Lab Assistant</option>
-                    </select>
-                </div>
-                <div>
-                    <button type="submit">Register as Faculty</button>
-                </div>
+                    {% if phone_error %}
+                    <div class="error">{{ phone_error }}</div>
+                    {% endif %}
+                    <div>
+                        <label for="Designation">Apply For</label>
+                        <select name="Designation" id="Designation">
+                            <option value="" selected disabled>Select</option>
+                            <option value="Professor" {% if facultyDesignation=='Professor' %}selected{% endif %}>
+                                Professor
+                            </option>
+                            <option value="Teaching Assistant" {% if facultyDesignation=='Teaching Assistant'
+                                %}selected{% endif %}>Teaching Assistant</option>
+                            <option value="Lab Assistant" {% if facultyDesignation=='Lab Assistant Assistant'
+                                %}selected{% endif %}>Lab Assistant</option>
+                        </select>
+                    </div>
+                    {% if designation_error %}
+                    <div>
+                        <h1 class="error">{{ designation_error }}</h1>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <button type="submit">Register as Faculty</button>
+                    </div>
             </form>
         </div>
     </div>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
+    </footer>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleForm();
+        });
         function toggleForm() {
             var userType = document.getElementById('userType').value;
             var studentForm = document.getElementById('studentForm');
@@ -213,7 +323,23 @@
             }
             {% endfor %}
         }
+        setTimeout(function () {
+            var successMessage = document.querySelector('.success');
+            var errorMessages = document.querySelectorAll('.error');
+            var queryMessages = document.querySelectorAll('.query');
 
+            if (successMessage) {
+                successMessage.style.display = 'none';
+            }
+
+            errorMessages.forEach(function (error) {
+                error.style.display = 'none';
+            });
+
+            queryMessages.forEach(function (query) {
+                query.style.display = 'none';
+            });
+        }, 3000);
     </script>
 </body>
 
