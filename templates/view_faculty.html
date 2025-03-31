@@ -90,16 +90,68 @@
             background-color: #e9e9e9;
         }
 
-        form .approve {
-            color: white;
+        .btn_success,
+        .btn_danger {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 10px 5px;
             border: none;
             border-radius: 5px;
-            text-align: center;
+            font-weight: bold;
             text-decoration: none;
-            display: inline-block;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn_success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn_success:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn_danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn_danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
             font-size: 16px;
-            margin: 4px 2px;
-            padding: 0;
+            text-align: left;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -120,10 +172,24 @@
         </ul>
     </nav>
     <main>
+        {% if query %}
+        <h1 class="query">{{query}}</h1>
+        {% endif %}
+        {% if queries %}
+        {% for q in queries %}
+        <h1 class="query">{{queries[q]}}</h1>
+        {% endfor %}
+        {% endif %}
+        {% if message_success%}
+        <h1 class="success">{{message_success}}</h1>
+        {% endif %}
+        {% if message_danger%}
+        <h1 class="error">{{message_danger}}</h1>
+        {% endif %}
         <br>
         <section class="details">
             <h2>Faculty Details</h2>
-            <form action="/admin/faculty/approve_faculty/{{faculty[0]}}" method="post">
+            <form>
                 <table>
                     <tr>
                         <th><label for="faculty_id">ID:</label></th>
@@ -191,29 +257,42 @@
                     <tr>
                         <td>
                             {% if faculty[10] == 'Pending' %}
-                            <form>
-                                <button type="submit">Approve</button>
-                            </form>
+                            <a class="btn_success" href="/admin/faculty/approve_faculty/{{faculty[0]}}">Approve</a>
 
-                            <form action="/admin/faculty/delete_faculty/{{faculty[0]}}" method="post"
-                                style="display:inline;padding: 0;">
-                                <button type="submit">Delete</button>
-                            </form>
+                            <a class="btn_danger" href="/admin/faculty/delete_faculty/{{faculty[0]}}">Delete</a>
                             {%else%}
-                        </form>
-                            <form action="/admin/faculty/delete_faculty/{{faculty[0]}}" method="post"
-                                style="display:inline;padding: 0;">
-                                <button type="submit">Delete</button>
-                            </form>
+                            <a class="btn_danger" href="/admin/faculty/delete_faculty/{{faculty[0]}}">Delete</a>
                             {% endif %}
                         </td>
                     </tr>
                 </table>
+            </form>
         </section>
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
