@@ -2375,7 +2375,7 @@ def signin():
         if not userType:
             errors['user_type_error'] = "please select a user type"
         if errors:
-            return render_template('signin.html', **errors, email=email,  userType=userType)
+            return render_template('SignIn.html', **errors, email=email,  userType=userType)
         if userType == 'student':
             mycursor.execute("SELECT * FROM students WHERE College_Email=%s AND Password=%s", (email, password))
             user = tuple((mycursor.fetchone()).values())
@@ -2395,8 +2395,8 @@ def signin():
                 session['user'] = user
                 return redirect(url_for('admin'))
         
-        return render_template('signin.html', credentials_error="Invalid credentials", email=email, userType=userType)
-    return render_template('signin.html')
+        return render_template('SignIn.html', credentials_error="Invalid credentials", email=email, userType=userType)
+    return render_template('SignIn.html')
 
 
 
@@ -2413,7 +2413,7 @@ def login():
         courses={"courses":[]}
         departments={"departments":[]}
     print(courses,departments,sep="*"*20)  
-    return render_template('signin.html',**courses,**departments)
+    return render_template('SignIn.html',**courses,**departments)
 
 
 
