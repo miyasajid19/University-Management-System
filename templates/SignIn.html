@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/signin_style.css') }}">
+    <style>
+        .error {
+            color: #ff0000;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 5px solid #ff0000;
+            background-color: #ffe6e6;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+    </style>
     <title>Sign In</title>
 </head>
 
@@ -25,38 +38,61 @@
         <form action="/login_user" method="POST">
             <div class="form-group">
                 <label for="email">Official Mail</label>
-                <input type="text" id="email" name="email">
+                <input type="text" id="email" name="email" value="{{ email }}">
+                {% if email_error %}
+                <div class="error">{{ email_error }}</div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password">
-            </div>
-            <div class="form-group">
-                <input type="checkbox" id="show-password"> Show Password
+                {% if password_error %}
+                <div class="error">{{ password_error }}</div>
+                {% endif %}
             </div>
             <div class="form-group">
                 <label for="user-type">User Type</label>
-                <select id="user-type" name="user-type" required>
+                <select id="user-type" name="user-type">
                     <option value="" selected disabled>Select</option>
-                    <option value="admin">Admin</option>
-                    <option value="student">Student</option>
-                    <option value="faculty">Faculty</option>
+                    <option value="admin" {% if userType=='admin' %}selected{% endif %}>Admin</option>
+                    <option value="student" {% if userType=='student' %}selected{% endif %}>Student</option>
+                    <option value="faculty" {% if userType=='faculty' %}selected{% endif %}>Faculty</option>
                 </select>
+                {% if user_type_error %}
+                <div class="error">{{ user_type_error }}</div>
+                {% endif %}
             </div>
+            {% if credentials_error %}
+            <div class="error">{{ credentials_error }}</div>
+            {% endif %}
             <button type="submit">Sign In</button>
         </form>
         <a href="/register" class="register-link">Not registered? Register</a>
     </div>
-    <script>
-        document.getElementById('show-password').addEventListener('change', function () {
-            var passwordField = document.getElementById('password');
-            if (this.checked) {
-                passwordField.type = 'text';
-            } else {
-                passwordField.type = 'password';
-            }
-        });
-    </script>
+    <footer>
+        <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
+    </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
