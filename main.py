@@ -418,7 +418,7 @@ def facultyDashboard():
     new_queries=request.args.get('queries',None)
     if new_queries:
         queries=ast.literal_eval(new_queries)
-    return render_template('facultyDashboard.html', faculty=faculty, phones=phones, upcoming_exams=upcoming_exams, recent_exams=recent_exams, locked_exams=locked_exams, message=message, error=error,queries=queries)
+    return render_template('FacultyDashboard.html', faculty=faculty, phones=phones, upcoming_exams=upcoming_exams, recent_exams=recent_exams, locked_exams=locked_exams, message=message, error=error,queries=queries)
 
 @app.route('/faculty/update/<string:phones>', methods=['POST'])
 def update_faculty(phones):
