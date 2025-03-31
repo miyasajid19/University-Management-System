@@ -893,7 +893,7 @@ def student():
     message=request.args.get('message',None)
     query="SELECT `Student_ID`, CONCAT(`First_Name`, ' ', COALESCE(`Middle_Name`, ''), ' ', `Last_Name`) AS `Full_Name`, CONCAT( COALESCE(`Street`, ''), ', ', COALESCE(`District`, ''), ', ', COALESCE(`State`, ''), ', ', COALESCE(`Country`, '') ) AS `Full_Address`, `Gender`, `Date_of_Birth`, `Email`, `College_Email`, `Password`, `Enrollment_Year`, `Graduation_Year`, `Status` FROM `students` WHERE Student_ID=%s;"
     mycursor.execute(query,(session['user'][0],))
-    student=tuple(tuple(student.values()for student in mycursor.fetchall()))[0]
+    student=tuple(tuple(student.values())for student in mycursor.fetchall())[0]
     queries['student']=querymaker(query,(session['user'][0],))
     query="SELECT Phone FROM student_phone_no WHERE Student_ID=%s;"
     mycursor.execute(query,(session['user'][0],))
