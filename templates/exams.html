@@ -133,13 +133,57 @@
             color: red;
             text-decoration: none;
         }
-        
+
         td button {
             color: blue;
             padding: 0px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .no_enrollment_error {
+            background-color: #fff2f2;
+            color: #d32f2f;
+            text-align: center;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #d32f2f;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
+            max-width: 800px;
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
         }
     </style>
 </head>
@@ -156,17 +200,29 @@
         </ul>
     </nav>
     <main>
+        {% if queries %}
+        {% for query in queries %}
+
+        <h1 class="query">{{ queries[query] }}</h1>
+        {% endfor %}
+        {% endif %}
+
+        {% if query %}
+        <h1 class="query">{{query}}</h1>
+        {%endif%}
+        {% if message_danger%}
+        <p class="error">{{message_danger}}</p>
+        {%endif%}
+        {% if message_success%}
+        <p class="success">{{message_success}}</p>
+        {%endif%}
+        {% if errors_update %}
+        {% for error in errors_update %}
+        <p class="error">{{errors_update[error]}}</p>
+        {%endfor%}
+        {%endif%}
         {% if upcoming_exams %}
         <h1>Upcoming Exams</h1>
-        {{exam_type}}
-        {%if exam_type %}
-        <div>
-            <ul>
-                
-                <li>{{ exam_type }}</li>
-            </ul>
-        </div>
-        {% endif %}
         <table>
             <thead>
                 <tr>
@@ -217,47 +273,110 @@
                     </tr>
                 </form>
                 {% endfor %}
+                {% if type_error_update%}
+                <tr>
+                    <td colspan="6">{{type_error_update}}</td>
+                </tr>
+                {%endif%}
+                {% if venue_error_update%}
+                <tr>
+                    <td colspan="6">{{venue_error_update}}</td>
+                </tr>
+                {%endif%}
+                {% if date_error_update%}
+                <tr>
+                    <td colspan="6">{{date_error_update}}</td>
+                </tr>
+                {%endif%}
+                {% if duration_error_update%}
+                <tr>
+                    <td colspan="6">{{duration_error_update}}</td>
+                </tr>
+                {%endif%}
+                {% if exist_error_update%}
+                <tr>
+                    <td colspan="6">{{exist_error_update}}</td>
+                </tr>
+                {%endif%}
+
+
+
+
+
             </tbody>
         </table>
         {% endif %}
+        {%if message %}
+        <p class="success">{{ message }}</p>
+        {% endif %}
+        {% if exist_error_update %}
+        <p class="error">{{ exist_error_update }}</p>
+        {% endif %}
+        {% if not no_enrollment %}
         <h1>Schedule Exam</h1>
         <form action="/faculty/exams/add" method="post">
             <div>
                 <label for="course_id">Course ID</label>
-                <input type="text" id="course_id" name="course_id" value="{{session['user'][9]}}" readonly required>
+                <input type="text" id="course_id" name="course_id" value="{{session['user'][9]}}" readonly>
             </div>
             <div>
                 <label for="exam_date">Exam Date</label>
-                <input type="date" id="exam_date" name="exam_date" required>
+                <input type="date" id="exam_date" name="exam_date" value="{% if exam_date %}{{ exam_date }}{% endif %}">
+                {% if date_error %}
+                <p class="error">{{ date_error }}</p>
+                {% endif %}
             </div>
             <div>
                 <label for="exam_duration">Exam Duration (hours)</label>
-                <input type="number" step="0.1" id="exam_duration" name="exam_duration" required>
+                <input type="number" step="0.1" id="exam_duration" name="exam_duration"
+                    value="{% if exam_duration %}{{ exam_duration }}{% endif %}">
+                {% if duration_error %}
+                <p class="error">{{ duration_error }}</p>
+                {% endif %}
             </div>
             <div>
                 <label for="exam_charge">Exam Charge</label>
-                <input type="number" step="1" id="exam_charge" name="exam_charge" required>
+                <input type="number" step="1" id="exam_charge" name="exam_charge"
+                    value="{% if exam_charge %}{{ exam_charge }}{% endif %}">
+                {% if charge_error %}
+                <p class="error">{{ charge_error }}</p>
+                {% endif %}
             </div>
             <div>
                 <label for="exam_type">Exam Type</label>
-                <select id="exam_type" name="exam_type" required>
+                <select id="exam_type" name="exam_type">
                     <option value="" selected disabled>Select</option>
-                    <option value="Mid Semester Test">Mid Semester Test</option>
-                    <option value="End Semester Test">End Semester Test</option>
-                    <option value="Quiz-1">Quiz-1</option>
-                    <option value="Quiz-2">Quiz-2</option>
-                    <option value="Lab Evaluation I">Lab Evaluation I</option>
-                    <option value="Lab Evaluation II">Lab Evaluation II</option>
-                    <option value="Others">Others</option>
+                    <option value="Mid Semester Test" {% if exam_type=='Mid Semester Test' %}selected{% endif %}>Mid
+                        Semester Test</option>
+                    <option value="End Semester Test" {% if exam_type=='End Semester Test' %}selected{% endif %}>End
+                        Semester Test</option>
+                    <option value="Quiz-1" {% if exam_type=='Quiz-1' %}selected{% endif %}>Quiz-1</option>
+                    <option value="Quiz-2" {% if exam_type=='Quiz-2' %}selected{% endif %}>Quiz-2</option>
+                    <option value="Lab Evaluation I" {% if exam_type=='Lab Evaluation I' %}selected{% endif %}>Lab
+                        Evaluation I</option>
+                    <option value="Lab Evaluation II" {% if exam_type=='Lab Evaluation II' %}selected{% endif %}>Lab
+                        Evaluation II</option>
+                    <option value="Others" {% if exam_type=='Others' %}selected{% endif %}>Others</option>
                 </select>
+                {% if type_error %}
+                <p class="error">{{ type_error }}</p>
+                {% endif %}
+                {% if exist_error %}
+                <p class="error">{{ exist_error }}</p>
+                {% endif %}
             </div>
             <div>
                 <label for="venue">Venue</label>
-                <input type="text" id="venue" name="venue" required>
+                <input type="text" id="venue" name="venue" value="{% if venue %}{{ venue }}{% endif %}">
+                {% if venue_error %}
+                <p class="error">{{ venue_error }}</p>
+                {% endif %}
             </div>
             <button type="submit">Schedule</button>
         </form>
-
+        {% else %}
+        <h1 class="no_enrollment_error">No Students are enrolled. Therefore, can't schedule exam.</h1>
+        {% endif %}
         {% if recent_exams %}
         <h1>Recent Exams</h1>
         <table>
@@ -286,7 +405,28 @@
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
