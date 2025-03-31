@@ -57,11 +57,14 @@
             margin-bottom: 20px;
         }
 
-        table, th, td {
+        table,
+        th,
+        td {
             border: 1px solid #ddd;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: left;
         }
@@ -86,6 +89,7 @@
         a:hover {
             text-decoration: underline;
         }
+
         footer {
             background-color: #333;
             color: #fff;
@@ -95,7 +99,40 @@
             width: 100%;
             bottom: 0;
         }
-        
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .no_enrollment_error {
+            background-color: #fff2f2;
+            color: #d32f2f;
+            text-align: center;
+            margin: 40px auto;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #d32f2f;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
+            max-width: 800px;
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -111,16 +148,53 @@
         </ul>
     </nav>
     <main>
+        {% if query %}
+        <p class="query">{{query}}</p>
+        {% endif %}
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{queries[query]}}</h1>
+        {%endfor%}
+        {%endif%}
+        {% if message_success %}
+        <p class="success">{{message_success}}</p>
+        {% endif %}
+        {% if message_danger %}
+        <p class="success">{{message_danger}}</p>
+        {% endif %}
+        {% if exams_about_To_held %}
+        <h2>Upcoming Exams</h2>
+        <table>
+            <tr>
+                <th>Exam ID</th>
+                <th>Course ID</th>
+                <th>Exam Date</th>
+                <th>Exam Duration (hr.)</th>
+                <th>Exam Type</th>
+                <th>Exam Venue</th>
+            </tr>
+            {% for exam in exams_about_To_held %}
+            <tr>
+                <td>{{ exam[0] }}</td>
+                <td>{{ exam[1] }}</td>
+                <td>{{ exam[2] }}</td>
+                <td>{{ exam[3] }}</td>
+                <td>{{ exam[4] }}</td>
+                <td>{{ exam[5] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
         {% if Exams_toEvaluate %}
         <h2>Exams to Evaluate</h2>
         <table>
             <tr>
                 <th>Exam ID</th>
                 <th>Course ID</th>
-                <th>Course Name</th>
                 <th>Exam Date</th>
-                <th>Exam Time</th>
-                <th>Duration</th>
+                <th>Exam Duration (hr.)</th>
+                <th>Exam Type</th>
+                <th>Exam Venue</th>
                 <th>Actions</th>
             </tr>
             {% for exam in Exams_toEvaluate %}
@@ -163,13 +237,34 @@
         </table>
         {% endif %}
         {%if not Exams_toEvaluate and not Locked_Result %}
-        <h1>No exams to evaluate or results to view.</h1>
+        <h1 class="no_enrollment_error">No exams to evaluate or results to view.</h1>
         {%endif%}
     </main>
 
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
