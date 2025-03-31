@@ -118,6 +118,39 @@
             width: 100%;
             bottom: 0;
         }
+
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -133,6 +166,22 @@
         </ul>
     </nav>
     <main>
+        {% if query %}
+        <h1 class="query">{{ query }}</h1>
+        {% endif %}
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{ queries[query] }}</h1>
+        {% endfor %}
+        {% endif %}
+
+        {% if message_success %}
+        <h1 class="success">{{message_success}}</h1>
+        {% endif %}
+
+        {% if message_error %}
+        <h1 class="error">{{message_error}}</h1>
+        {% endif %}
         {% if course_registration_fees_pending %}
         <section>
             <h1>Course Registration Fees Pending</h1>
@@ -286,7 +335,6 @@
         {% endif %}
 
         {% if course_registration_fees_paid %}
-        {{course_registration_fees_paid}}
         <section>
             <h1>Course Registration Fees Paid</h1>
             <table>
@@ -357,13 +405,35 @@
             </table>
         </section>
         {% endif %}
-        {% if not course_registration_fees_pending and not course_registration_fees_paid and not exam_fees_pending and not exam_fees_paid and not registration_fees_pending and not registration_fees_paid %}
+        {% if not course_registration_fees_pending and not course_registration_fees_paid and not exam_fees_pending and
+        not exam_fees_paid and not registration_fees_pending and not registration_fees_paid %}
         <h1>No Fees available in database</h1>
         {% endif %}
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
+<script>
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
+</script>
 
 </html>
