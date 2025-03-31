@@ -1,4 +1,3 @@
-import mysql.connector
 import pymysql
 connection = None
 timeout = 10
