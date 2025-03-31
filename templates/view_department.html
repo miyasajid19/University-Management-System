@@ -5,66 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ (session.user[1].upper()) }} | Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
+        
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main_style.css') }}">
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
     <style>
-        nav {
+        main {
+            padding-top: 60px;
+            padding-bottom: 40px;
+            margin: 20px auto;
+            width: 90%;
+        }
+
+
+        .btn-submit,
+        .btn-danger {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        .btn-submit {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #45a049;
+        }
+
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #da190b;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
             background-color: #333;
             color: #fff;
-            padding: 10px 0;
-            text-align: center;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            left: 0;
         }
 
-        nav ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 15px;
-        }
-
-        nav ul li a {
-            color: #fff;
+        a {
             text-decoration: none;
-            padding: 10px 15px;
-            transition: background-color 0.3s ease;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
         }
 
-        nav ul li a:hover,
-        nav ul li a.active {
-            background-color: #555;
+        .select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
             border-radius: 5px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .query {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
             margin: 20px 0;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
-
-        th,
-        td {
-            padding: 8px;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            font-size: 16px;
             text-align: left;
         }
 
-        th {
-            background-color: #f2f2f2;
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: left;
         }
 
-        .formattedInput {
-            width: 100%;
+        .appoint {
+            display: block;
+            margin: 0 auto;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
             border: none;
-            outline: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .appoint:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #da2638;
+            padding: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #f80019;
+            border-radius: 5px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -84,9 +141,21 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    {{session.user}}
-    {{department}}
     <main>
+        {% if query %}
+        <h1 class="query">{{query}}</h1>
+        {% endif %}
+        {% if queries %}
+        {% for query in queries %}
+        <h1 class="query">{{queries[query]}}</h1>
+        {% endfor %}
+        {% endif %}
+        {% if message_danger %}
+        <h1 class="error">{{message_danger}}</h1>
+        {% endif %}
+        {% if message_success_hod %}
+        <h1 class="success">{{message_success_hod}}</h1>
+        {% endif %}
         <h2>Details</h2>
         <table>
             <tr>
@@ -106,47 +175,60 @@
                     <td><input class="formattedInput" type="text" name="credits" value="{{ department[3] }}"></td>
                     <td><input class="formattedInput" type="text" name="credits" value="{{ department[4] }}"></td>
                     <td>
-                        <button type="submit">Update</button>
+                        <button type="submit" class="btn-submit">Update</button>
                 </form>
                 <form action="/admin/departments/delete/{{ department[0] }}" method="post" style="display:inline;">
-                    <button type="submit">Delete</button>
+                    <button type="submit" class="btn-danger">Delete</button>
                 </form>
-
                 </td>
             </tr>
-
         </table>
-        {{faculties}}
 
         <h2>Faculties</h2>
+        {% if faculty_id_error %}
+        <h1 class="error">{{faculty_id_error}}</h1>
+        {% endif %}
+        {% if faculty_name_error %}
+        <h1 class="error">{{faculty_name_error}}</h1>
+        {% endif %}
+        {% if faculty_mail_error %}
+        <h1 class="error">{{faculty_mail_error}}</h1>
+        {% endif %}
+        {% if message_success %}
+        <h1 class="success">{{message_success}}</h1>
+        {% endif %}
+
         <table>
             <tr>
                 <th>Faculty ID</th>
                 <th>Faculty Name</th>
                 <th>Designation</th>
-                <th>Mail    </th>
+                <th>Mail</th>
                 <th>Work Mail</th>
                 <th>Action</th>
             </tr>
             {% for faculty in faculties %}
-
             <tr>
-                
-                <form action="/admin/view_department/{{department[0]}}/update_faculty/{{faculty[0]}}" method="post" >
-                    <td><input class="formattedInput" type="text" name="faculty_id_{{faculty[0]}}" value="{{ faculty[0] }}" ></td>
-                    <td><input class="formattedInput" type="text" name="faculty_name_{{faculty[0]}}" value="{{ faculty[1] }}">
-                    </td>
-                    <td><input class="formattedInput" type="text" name="faculty_designation_{{faculty[0]}}" value="{{ faculty[2] }}" readonly></td>
-                    <td><input class="formattedInput" type="text" name="faculty_mail_{{faculty[0]}}" value="{{ faculty[3] }}"></td>
-                    <td><input class="formattedInput" type="text" name="faculty_official_mail_{{faculty[0]}}" value="{{ faculty[4] }}" readonly></td>
+                <form action="/admin/view_department/{{department[0]}}/update_faculty/{{faculty[0]}}" method="post">
+                    <td><input class="formattedInput" type="text" name="faculty_id_{{faculty[0]}}"
+                            value="{{ faculty[0] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_name_{{faculty[0]}}"
+                            value="{{ faculty[1] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_designation_{{faculty[0]}}"
+                            value="{{ faculty[2] }}" readonly></td>
+                    <td><input class="formattedInput" type="text" name="faculty_mail_{{faculty[0]}}"
+                            value="{{ faculty[3] }}"></td>
+                    <td><input class="formattedInput" type="text" name="faculty_official_mail_{{faculty[0]}}"
+                            value="{{ faculty[4] }}" readonly></td>
                     <td>
-                        <button type="submit">Update</button>
+                        <button type="submit" class="btn-submit">Update</button>
                 </form>
-                <form action="/admin/view_department/{{department[0]}}/delete_faculty/{{faculty[0]}}" method="post" style="display:inline;">
-                    <button type="submit">Delete</button>
+                <form action="/admin/view_department/{{department[0]}}/delete_faculty/{{faculty[0]}}" method="post"
+                    style="display:inline;">
+                    <button type="submit" class="btn-danger">Delete</button>
                 </form>
                 <form action="/admin/view_department/{{department[0]}}" method="post" style="display:inline;">
-                    <button type="submit">View</button>
+                    <button type="submit" class="btn-submit">View</button>
                 </form>
                 </td>
             </tr>
@@ -155,13 +237,10 @@
         <h3>Appoint Head Of Department</h3>
         <table>
             <form action="/admin/view_department/{{department[0]}}/appoint_HOD" method="post">
-
                 <tr>
-                    <th>
-                        Faculty ID :
-                    </th>
+                    <th>Faculty ID :</th>
                     <td>
-                        <select name="hod_id" id="hod_id" onchange="syncFacultyName()">
+                        <select name="hod_id" id="hod_id" class="select" onchange="syncFacultyName()">
                             {% for faculty in faculties %}
                             <option value="{{faculty[0]}}">{{faculty[0]}}</option>
                             {% endfor %}
@@ -169,28 +248,27 @@
                     </td>
                 </tr>
                 <tr>
-                    <th>
-                        Faculty Name :
-                    </th>
+                    <th>Faculty Name :</th>
                     <td>
-                        <select name="hod_name" id="hod_name" onchange="syncFacultyId()">
+                        <select name="hod_name" id="hod_name" class="select" onchange="syncFacultyId()">
                             {% for faculty in faculties %}
                             <option value="{{faculty[1]}}">{{faculty[1]}}</option>
                             {% endfor %}
                         </select>
                     </td>
                 </tr>
-                <tr colspan="2">
-                    <td>
-                        <button type="submit">Appoint</button>
+                <tr>
+                    <td colspan="2">
+                        <button type="submit" class="appoint">Appoint</button>
                     </td>
-
                 </tr>
             </form>
         </table>
     </main>
     <footer>
         <p>&copy; 2025 University Management System</p>
+        <p>Developed and Designed by Sajid Miya</p>
+
     </footer>
 </body>
 <script>
@@ -203,6 +281,7 @@
         }
         {% endfor %}
     }
+
     function syncFacultyId() {
         var facultyName = document.getElementById('hod_name').value;
         var facultyID = document.getElementById('hod_id');
@@ -212,6 +291,23 @@
         }
         {% endfor %}
     }
+    setTimeout(function () {
+        var successMessage = document.querySelector('.success');
+        var errorMessages = document.querySelectorAll('.error');
+        var queryMessages = document.querySelectorAll('.query');
+
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+
+        errorMessages.forEach(function (error) {
+            error.style.display = 'none';
+        });
+
+        queryMessages.forEach(function (query) {
+            query.style.display = 'none';
+        });
+    }, 3000);
 </script>
 
 </html>
