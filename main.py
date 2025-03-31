@@ -2349,7 +2349,7 @@ def admin():
     mycursor.execute(query, (session['user'][0],))
     admin = tuple((mycursor.fetchone()).values())
     print(admin)
-    return render_template('adminDashboard.html',message_success=request.args.get('message_success',None),message_danger=request.args.get('message_danger',None))
+    return render_template('AdminDashboard.html',message_success=request.args.get('message_success',None),message_danger=request.args.get('message_danger',None))
 
 
 @app.route('/logout')
