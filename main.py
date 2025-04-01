@@ -2422,14 +2422,16 @@ def signin():
             return render_template('SignIn.html', **errors, email=email,  userType=userType)
         if userType == 'student':
             mycursor.execute("SELECT * FROM students WHERE College_Email=%s AND Password=%s", (email, password))
-            user = tuple((mycursor.fetchone()).values())
+            user = mycursor.fetchone()
             if user:
+                user = tuple(user.values())
                 session['user'] = user
                 return redirect(url_for('student'))
         elif userType == 'faculty':
             mycursor.execute("SELECT * FROM faculty WHERE official_mail=%s AND Password=%s", (email, password))
-            user = tuple((mycursor.fetchone()).values())
+            user = mycursor.fetchone()
             if user:
+                user = tuple(user.values())
                 session['user'] = user
                 return redirect(url_for('faculty'))
         elif userType == 'admin':
