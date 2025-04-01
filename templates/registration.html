@@ -4,31 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="{{url_for('static', filename='css/nav_style.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='css/register_style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}">
+    <title>UMS | Home</title>
     <style>
-        .error {
-            background-color: #f8d7da;
-            color: #da2638;
-            padding: 5px;
-            margin: 20px 0;
-            border-left: 5px solid #f80019;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 15px;
-            margin: 20px 0;
-            border-left: 5px solid #28a745;
-            border-radius: 5px;
-            font-size: 16px;
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 14px;
+            color: white;
         }
     </style>
-    <title>UMS | Home</title>
 </head>
 
 <body>
@@ -36,8 +27,8 @@
         <ul>
             <li><a href="/">UMS</a></li>
             <li><a href="/">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="/aboutme">About</a></li>
+            <li><a href="documentations">Documentations</a></li>
             <li><a href="/signin">Sign In</a></li>
             <li><a href="/signup" class="active">Sign Up</a></li>
         </ul>
@@ -259,6 +250,7 @@
         <p>Developed and Designed by Sajid Miya</p>
 
     </footer>
+    </body>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             toggleForm();
@@ -341,6 +333,5 @@
             });
         }, 3000);
     </script>
-</body>
 
 </html>
