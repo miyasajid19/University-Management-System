@@ -928,14 +928,17 @@ def student():
 def update_student(student_id):
     if 'user' not in session:
         return redirect(url_for('login'))
-    
+    print("here")
     if request.method == 'POST':
         queries={}
         # Initialize error flags
         errors = {}
         valid_data = {}
         # Validate name
+        print("here")
+        print(request.form)
         name = request.form.get('studentName')
+        print(name)
         if not name:
             errors['name_error'] = "Name cannot be empty"
         elif len(name) < 3:
@@ -957,6 +960,7 @@ def update_student(student_id):
         
         # Validate address
         address = request.form.get('Address')
+        print(address)
         if not address:
             errors['address_error'] = "Address cannot be empty"
         else:
@@ -980,6 +984,7 @@ def update_student(student_id):
         
         # Validate date of birth
         dob = request.form.get('DOB')
+        print(dob)
         if not dob:
             errors['dob_error'] = "Date of birth is required"
         elif dob > str(datetime.datetime.now().date()):
@@ -989,6 +994,7 @@ def update_student(student_id):
         
         # Validate email
         email = request.form.get('studentEmail')
+        print(email)
         if not email:
             errors['email_error'] = "Email is required"
         elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
@@ -998,6 +1004,7 @@ def update_student(student_id):
             
         # Validate work email
         work_mail = request.form.get('WorkMail')
+        print(work_mail)
         if not work_mail:
             errors['work_mail_error'] = "Work email is required"
         elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', work_mail):
@@ -1007,6 +1014,7 @@ def update_student(student_id):
         
         # Validate password
         password = request.form.get('password')
+        print(password)
         if not password:
             errors['password_error'] = "Password is required"
         elif len(password) < 8:
@@ -1017,9 +1025,13 @@ def update_student(student_id):
         # Validate phone numbers
         valid_phones = []
         invalid_phones = []
+        print(session['phones'])
         for i in session['phones']:
+            temp=[]
             current_phone = i[0]
+            print(current_phone)
             new_phones = request.form.get(f'phone_{current_phone}').split(',')
+            print(new_phones,'->>>>>>>>>>>>>>')
             for new_phone in new_phones:
                 new_phone=new_phone.strip()
                 if new_phone and new_phone != current_phone:
@@ -1034,14 +1046,22 @@ def update_student(student_id):
                     is_valid = any(re.match(pattern, new_phone) for pattern in phone_patterns)
                     
                     if is_valid:
-                        valid_phones.append((current_phone, new_phone))
+                        temp.append((current_phone, new_phone))
+                        print("valid",new_phone)
                     else:
                         invalid_phones.append(new_phone)
+                        print("invalid",new_phone)
+                elif new_phone == current_phone:
+                    # No change, keep the current phone number
+                    temp.append((current_phone, current_phone))
                 elif not new_phone:
                     # Mark for deletion
-                    valid_phones.append((current_phone, None))
+                    temp.append((current_phone, None))
                 # If unchanged, do nothing
-        
+            print("temp",temp)
+            valid_phones.extend(temp)
+            print("valid_phones -----------> ",valid_phones)
+        print(valid_phones,"^"*5)
         if invalid_phones:
             errors['phone_error'] = f"Invalid phone number format: {', '.join(invalid_phones)}"
         
@@ -1072,34 +1092,64 @@ def update_student(student_id):
             valid_data['password'], 
             student_id
         )
-
         mycursor.execute(query, values)
         mydb.commit()
         queries['student']=querymaker(query,values)
         # Process phone numbers (only valid ones)
         # First, handle updates and deletions for existing phone numbers
-        for current_phone, new_phone in valid_phones:
+        remaining_phones = valid_phones.copy()
+        print(valid_phones)
+        print(len(valid_phones),'---->',len(session['phones']))
+
+        # for current_phone, new_phone in valid_phones:
+        for i in range(len(session['phones'])):
+            print(i,"\n"*5)
+            print("valid_phones",valid_phones)
+            print("session['phones']",session['phones'])
+            print("remaining_phones",remaining_phones)
+            current_phone = valid_phones[i][0]
+            new_phone = valid_phones[i][1]
+            print("current_phone",current_phone)
             if new_phone is None:
                 # Delete the phone number
                 query = "DELETE FROM student_phone_no WHERE Phone=%s AND Student_ID=%s"
                 values = (current_phone, student_id)
                 mycursor.execute(query, values)
                 queries['delete_phone']=querymaker(query,values)
+                remaining_phones.remove((current_phone, new_phone))
+                print("removed",current_phone,new_phone)
+
             elif new_phone != current_phone:
                 # Update the phone number
                 query = "UPDATE student_phone_no SET Phone=%s WHERE Phone=%s AND Student_ID=%s"
                 values = (new_phone, current_phone, student_id)
                 mycursor.execute(query, values)
                 queries['update_phone']=querymaker(query,values)
+                print(2)
+                remaining_phones.remove((current_phone, new_phone))
+                print("removed",current_phone,new_phone)
+                print("remaining_phones",remaining_phones)
+            else:
+                # No change, keep the current phone number
+                remaining_phones.remove((current_phone, new_phone))
+                print("remaining_phones",remaining_phones)
+                print("removed",current_phone,new_phone)
+                print("No change",current_phone,new_phone)
         # Get the current phone numbers after updates
         query = "SELECT Phone FROM student_phone_no WHERE Student_ID=%s"
         mycursor.execute(query, (student_id,))
-        current_phones = [phone[0] for phone in mycursor.fetchall()]
+        x=list(tuple(x.values())[0]for x in mycursor.fetchall())
+        print(x)
+        print(type(x))
+        current_phones = [phone[0] for phone in x]
         queries['current_phones']=querymaker(query,(student_id,))
-        
         # Add any new phone numbers that weren't updates
-        for _, new_phone in valid_phones:
-            if new_phone and new_phone not in current_phones:
+        for _, new_phone in remaining_phones:
+            print("remaining_phones",remaining_phones)
+            print("_",_)
+            print("new_phone",new_phone)
+            if new_phone:
+                print("new_phone",new_phone)
                 query = "INSERT INTO student_phone_no (Student_ID, Phone) VALUES (%s, %s)"
                 mycursor.execute(query, (student_id, new_phone))
                 current_phones.append(new_phone)
