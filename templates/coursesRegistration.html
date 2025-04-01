@@ -236,6 +236,8 @@
         </nav>
     </header>
     <main>
+
+
         {% if query %}
         <h1 class="query">{{ query }}</h1>
         {% endif %}
@@ -279,6 +281,8 @@
                 {% endif %}
             </tbody>
         </table>
+        {% if registered_courses | length != courses | length %}
+        
         <h2>Course Registration</h2>
         <form action="/student/register" method="post">
 
@@ -310,7 +314,9 @@
 
             <button type="submit">Register</button>
         </form>
-
+        {% else %}
+        <h1 class="success">All Courses offered by this University is enrolled</h1>
+        {% endif %}
     </main>
     <footer>
         <p>
