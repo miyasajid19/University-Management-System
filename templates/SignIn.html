@@ -4,22 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/nav_style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/signin_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}">
+    <title>Sign In</title>
     <style>
-        .error {
-            color: #ff0000;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            padding: 10px;
-            border-left: 5px solid #ff0000;
-            background-color: #ffe6e6;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
+        nav {
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
         }
     </style>
-    <title>Sign In</title>
 </head>
 
 <body>
@@ -27,8 +21,8 @@
         <ul>
             <li><a href="/">UMS</a></li>
             <li><a href="/">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="/aboutme">About</a></li>
+            <li><a href="documentations">Documentations</a></li>
             <li><a href="/signin" class="active">Sign In</a></li>
             <li><a href="/signup">Sign Up</a></li>
         </ul>
