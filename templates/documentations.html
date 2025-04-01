@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Documentations | UMS</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .center-content {
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        nav {
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin: 0 10px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            background-color: #555;
+            border-radius: 5px;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            width: 100%;
+        }
+        .file-list {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+
+        .file-list ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .file-list ul li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .file-list ul li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .file-list ul li img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+
+        .file-list ul li a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .file-list ul li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <ul>
+            <li><a href="/">UMS</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/aboutme">About</a></li>
+            <li><a href="/documentations" class="active">Documentations</a></li>
+            <li><a href="/signin">Sign In</a></li>
+            <li><a href="/signup">Sign Up</a></li>
+        </ul>
+    </nav>
+
+    <main class="center-content">
+        <h1>Documentations</h1>
+        <p>Below are the files available under the <strong>static/files</strong> directory:</p>
+        <section class="file-list">
+            <ul>
+                {% for file in documentation_files %}
+                <li>
+                <img src="{{ url_for('static', filename='images/' + file[0] + '.png') }}" alt="File Icon" >
+
+                    <a href="{{ url_for('static', filename='files/' + file[1]) }}">{{ file[1] }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Sajid Miya. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>
