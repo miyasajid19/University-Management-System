@@ -10,6 +10,7 @@ import re
 import ast
 import threading
 import pymysql
+import os
 app.config['MAIL_SERVER'] = credentials['MAIL_SERVER']
 app.config['MAIL_PORT'] = credentials['MAIL_PORT']
 app.config['MAIL_USE_SSL'] = credentials['MAIL_USE_SSL']
@@ -440,31 +441,127 @@ def update_faculty(phones):
             FirstName=names[0]
             MiddleName=' '.join(names[1:-1])
             LastName=names[-1]
-        phone_numbers = [phone[0] for phone in eval(phones)]
-        for i in phone_numbers:
-            new_phone = request.form.get(f'faculty_phone_{i}')
-            if new_phone != i and new_phone:
-                query="UPDATE faculty_phone_no SET Phone=%s WHERE Phone=%s and Faculty_ID=%s"
-                values=(new_phone,i,session['user'][0])
-                mycursor.execute(query,values)
-                queries[f'phone_{i}']=querymaker(query,(new_phone,i,session['user'][0]))
-                mydb.commit()
-            elif not new_phone:
-                query="DELETE FROM faculty_phone_no WHERE Phone=%s and Faculty_ID=%s"
-                values=(i,session['user'][0])
-                mycursor.execute(query,values)
-                queries[f'phone_{i}']=querymaker(query,(i,session['user'][0]))
-                mydb.commit()
-
+        print(names)
+        phones=ast.literal_eval(phones)
+        print(phones)
+        phones=tuple(x[0] for x in phones )
+        print(phones)
+        valid_phones = []
+        invalid_phones = []
+        for i in phones:
+            print(i)
+            temp=[]
+            current_phone = i
+            print(current_phone)
+            new_phones = request.form.get(f'faculty_phone_{current_phone}').split(',')
+            print(new_phones,'->>>>>>>>>>>>>>')
+            for new_phone in new_phones:
+                new_phone=new_phone.strip()
+                if new_phone and new_phone != current_phone:
+                    # Define valid phone patterns
+                    phone_patterns = [
+                        r'^\+\d{1,3}\d{10}$',      # International format with no space: +1234567890, +911234567890
+                        r'^\+\d{1,3}\s\d{10}$',    # International format with space: +123 4567890, +91 1234567890
+                        r'^\d{10}$'                # Local format: 1234567890
+                    ]
+                    
+                    # Check if the phone number is valid
+                    is_valid = any(re.match(pattern, new_phone) for pattern in phone_patterns)
+                    
+                    if is_valid:
+                        temp.append((current_phone, new_phone))
+                        print("valid",new_phone)
+                    else:
+                        invalid_phones.append(new_phone)
+                        print("invalid",new_phone)
+                elif new_phone == current_phone:
+                    # No change, keep the current phone number
+                    temp.append((current_phone, current_phone))
+                elif not new_phone:
+                    # Mark for deletion
+                    temp.append((current_phone, None))
+                # If unchanged, do nothing
+            print("temp",temp)
+            valid_phones.extend(temp)
+            print("valid_phones -----------> ",valid_phones)
+        print(valid_phones,"^"*5)
+        if invalid_phones:
+            errors['phone_error'] = f"Invalid phone number format: {', '.join(invalid_phones)}"
+        
         personal_mail=request.form.get('faculty_personal_mail')
-        work_mail=request.form.get('faculty_work_mail')
         password=request.form.get('faculty_password')
         session['user'] = (session['user'][0], FirstName, MiddleName, LastName, session['user'][4], session['user'][5], session['user'][6], session['user'][7], session['user'][8], session['user'][9])
-        query="UPDATE faculty SET First_Name=%s, Middle_Name=%s, Last_Name=%s, Mail=%s, Official_Mail=%s, Password=%s WHERE Faculty_ID=%s"
-        values=(FirstName,MiddleName,LastName,personal_mail,work_mail,password,session['user'][0])
+        query="UPDATE faculty SET First_Name=%s, Middle_Name=%s, Last_Name=%s, Mail=%s, Password=%s WHERE Faculty_ID=%s"
+        values=(FirstName,MiddleName,LastName,personal_mail,password,session['user'][0])
         mycursor.execute(query,values)
         mydb.commit()
-        queries['faculty']=querymaker(query,(FirstName,MiddleName,LastName,personal_mail,work_mail,password,session['user'][0]))
+        print(4)
+        queries['faculty']=querymaker(query,(FirstName,MiddleName,LastName,personal_mail,password,session['user'][0]))
+        print(5)
+
+
+        remaining_phones = valid_phones.copy()
+        print(valid_phones)
+        print(len(valid_phones),'---->',len(phones))
+
+
+        # for current_phone, new_phone in valid_phones:
+        for i in range(len(phones)):
+            print(i,"\n"*5)
+            print("valid_phones",valid_phones)
+            print("phones",phones)
+            print("remaining_phones",remaining_phones)
+            current_phone = valid_phones[i][0]
+            new_phone = valid_phones[i][1]
+            print("current_phone",current_phone)
+            if new_phone is None:
+                # Delete the phone number
+                query = "DELETE FROM faculty_phone_no WHERE Phone=%s AND Faculty_ID=%s"
+                values = (current_phone, session['user'][0])
+                mycursor.execute(query, values)
+                queries['delete_phone']=querymaker(query,values)
+                remaining_phones.remove((current_phone, new_phone))
+                print("removed",current_phone,new_phone)
+
+            elif new_phone != current_phone:
+                # Update the phone number
+                query = "UPDATE faculty_phone_no SET Phone=%s WHERE Phone=%s AND Faculty_ID=%s"
+                values = (new_phone, current_phone, session['user'][0])
+                mycursor.execute(query, values)
+                queries['update_phone']=querymaker(query,values)
+                print(2)
+                remaining_phones.remove((current_phone, new_phone))
+                print("removed",current_phone,new_phone)
+                print("remaining_phones",remaining_phones)
+            else:
+                # No change, keep the current phone number
+                remaining_phones.remove((current_phone, new_phone))
+                print("remaining_phones",remaining_phones)
+                print("removed",current_phone,new_phone)
+                print("No change",current_phone,new_phone)
+        # Get the current phone numbers after updates
+        query = "SELECT Phone FROM faculty_phone_no WHERE Faculty_ID=%s"
+        mycursor.execute(query, (session['user'][0],))
+        x=list(tuple(x.values())[0]for x in mycursor.fetchall())
+        print(x)
+        print(type(x))
+
+        current_phones = [phone[0] for phone in x]
+        queries['current_phones']=querymaker(query,(session['user'][0],))
+
+        # Add any new phone numbers that weren't updates
+        for _, new_phone in remaining_phones:
+            print("remaining_phones",remaining_phones)
+            print("_",_)
+            print("new_phone",new_phone)
+            if new_phone:
+                print("new_phone",new_phone)
+                query = "INSERT INTO faculty_phone_no (Faculty_ID, Phone) VALUES (%s, %s)"
+                mycursor.execute(query, (session['user'][0], new_phone))
+                current_phones.append(new_phone)
+                queries['insert_phone']=querymaker(query,(session['user'][0],new_phone))
+        print('passed')
+
         return redirect(url_for('facultyDashboard', message="Updated", queries=queries))
     return redirect(url_for('facultyDashboard', error="Failed to update"))  # Redirect to dashboard with error message
 
@@ -2468,10 +2565,22 @@ def login():
 
 
 
+@app.route('/aboutme')
+def aboutme():
+    return render_template('aboutme.html')
 
 
-
-
+@app.route('/documentations')
+def documentations():
+    documentation_files = []
+    for file in os.listdir('static/files'):
+        file_path = os.path.join('static/files', file)
+        if os.path.isfile(file_path):
+            extension = os.path.splitext(file)[1][1:] # Get the file extension
+            documentation_files.append((extension, file))  # Append as tuple (extension, filename.ext)
+    # Render the template with the list of tuples
+    print(documentation_files)
+    return render_template('documentations.html', documentation_files=documentation_files)
 
 if __name__ == '__main__':
 
