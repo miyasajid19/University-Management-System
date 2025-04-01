@@ -47,10 +47,8 @@ try:
         user="avnadmin",
         write_timeout=timeout,
     )
-    print("Connected to the database")
 except pymysql.err.OperationalError as err:
     if "Unknown database" in str(err):
-        print("Database does not exist. Setting up the database...")
         setup.create_database()
         mydb = pymysql.connect(
             charset="utf8mb4",
@@ -66,9 +64,7 @@ except pymysql.err.OperationalError as err:
         )
         setup.create_tables()
         setup.insert_initial_data()
-        print("Database setup completed")
     else:
-        print("Error: ", err)
         raise
 
 
@@ -82,10 +78,7 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
     if UserType=='student':
         mycursor.execute("SELECT MAX(Student_ID) FROM students")
 
-        result = tuple((mycursor.fetchone()).values())
-        result=tuple(result.values())
-        print(result)
-        print(type(result))
+        result = tuple((mycursor.fetchone()).values())[0]
         
         if result is None:
             result = 102367001
@@ -93,19 +86,16 @@ def generateIDPass(UserType,FirstName,LastName,digits=60):
             result =int(result)+ 1
         mail = FirstName[0] + LastName + str(digits)+'_be'+str(datetime.datetime.now().date().year)[-2:]+'@thapar.edu'
         mycursor.execute("select * from students where College_Email=%s", (mail,))
-        if tuple((mycursor.fetchone()).values()):
+        if mycursor.fetchone():
             return generateIDPass(UserType,FirstName,LastName,int(digits)+1)
             
     elif UserType=='faculty':
         mycursor.execute("SELECT MAX(Faculty_ID) FROM faculty")
         result = tuple((mycursor.fetchone()).values())[0]
-        print(result)
         if result is None:
             result = 1
-            print(result)
         else:
             result =int(result)+ 1
-            print(result)
         mail = FirstName[0] + LastName + str(digits) + '@thapar.edu'
         mycursor.execute("select * from faculty where official_mail=%s", (mail,))
         if mycursor.fetchone():
@@ -223,9 +213,8 @@ def register_student():
             email_error = "Invalid email"
         else:
             mycursor.execute("SELECT * FROM students WHERE email=%s", (email,))
-            if tuple((mycursor.fetchone()).values()):
+            if mycursor.fetchone():
                 email_error = "Email already exists"
-        print(email,email_error,sep="n\n\n\nn\n\n\n")
         phones = request.form.get('phone').strip().split(',')
         for phone in phones:
             if not re.match(r"^\+?\d{1,3}[-\s]?\d{10}$", phone) and not re.match(r"^\d{10}$", phone):
@@ -286,7 +275,6 @@ def register_faculty():
         facultyDepartmentID = request.form.get('facultyDepartmentID')
         facultyDepartmentName = request.form.get('facultyDepartmentName')
         facultyDesignation = request.form.get('Designation')
-        print(facultyCourseID,"------------------------>>>>>")
         if not firstname:
             firstname_error = "First name cannot be empty"
         elif len(firstname) < 3:
@@ -324,26 +312,20 @@ def register_faculty():
         except:
             courses={"courses":[]}
             departments={"departments":[]}
-        print("here")
-        print(email_error, phone_error, firstname_error,middlename_error,lastname_error, course_id_error, department_id_error, designation_error,sep="\n\n\n")
         if any([email_error, phone_error, firstname_error,middlename_error,lastname_error, course_id_error, department_id_error, designation_error]):
             return render_template('registration.html',**courses,**departments, email_error=email_error, phone_error=phone_error, firstname_error=firstname_error,lastname_error=lastname_error,middlename_error=middlename_error, course_id_error=course_id_error, department_id_error=department_id_error, designation_error=designation_error,firstname=firstname,middlename=middlename,lastname=lastname,email=email,phone=(',').join(phones),userType='faculty',facultyCourseID=facultyCourseID,facultyDepartmentID=facultyDepartmentID,facultyDesignation=facultyDesignation,facultyCourseName=facultyCourseName,facultyDepartmentName=facultyDepartmentName)
-        print("there")
         mail, password, result = generateIDPass('faculty', firstname.lower(), "")
         query = "INSERT INTO faculty (Faculty_ID, First_Name, Middle_Name, Last_Name, Date_of_Joining, Designation, Mail, Official_Mail, Password, Course_ID, Department_ID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         values = (result, firstname, middlename, lastname, datetime.datetime.now().date(), facultyDesignation, email, mail.lower(), password, facultyCourseID, facultyDepartmentID)
         mycursor.execute(query, values)
         mydb.commit()
-        print("there___")
         for phone in phones:
             sql = "INSERT INTO faculty_phone_no (Faculty_ID, Phone) VALUES (%s, %s)"
             mycursor.execute(sql, (result, phone))
         mydb.commit()
         
-        print("there___-----")
         return render_template('index.html', message_success="Faculty registration successful.")
     
-    print("there___-----")
     return render_template('registration.html')
 
 
@@ -441,20 +423,14 @@ def update_faculty(phones):
             FirstName=names[0]
             MiddleName=' '.join(names[1:-1])
             LastName=names[-1]
-        print(names)
         phones=ast.literal_eval(phones)
-        print(phones)
         phones=tuple(x[0] for x in phones )
-        print(phones)
         valid_phones = []
         invalid_phones = []
         for i in phones:
-            print(i)
             temp=[]
             current_phone = i
-            print(current_phone)
             new_phones = request.form.get(f'faculty_phone_{current_phone}').split(',')
-            print(new_phones,'->>>>>>>>>>>>>>')
             for new_phone in new_phones:
                 new_phone=new_phone.strip()
                 if new_phone and new_phone != current_phone:
@@ -470,10 +446,8 @@ def update_faculty(phones):
                     
                     if is_valid:
                         temp.append((current_phone, new_phone))
-                        print("valid",new_phone)
                     else:
                         invalid_phones.append(new_phone)
-                        print("invalid",new_phone)
                 elif new_phone == current_phone:
                     # No change, keep the current phone number
                     temp.append((current_phone, current_phone))
@@ -481,10 +455,7 @@ def update_faculty(phones):
                     # Mark for deletion
                     temp.append((current_phone, None))
                 # If unchanged, do nothing
-            print("temp",temp)
             valid_phones.extend(temp)
-            print("valid_phones -----------> ",valid_phones)
-        print(valid_phones,"^"*5)
         if invalid_phones:
             errors['phone_error'] = f"Invalid phone number format: {', '.join(invalid_phones)}"
         
@@ -495,25 +466,16 @@ def update_faculty(phones):
         values=(FirstName,MiddleName,LastName,personal_mail,password,session['user'][0])
         mycursor.execute(query,values)
         mydb.commit()
-        print(4)
         queries['faculty']=querymaker(query,(FirstName,MiddleName,LastName,personal_mail,password,session['user'][0]))
-        print(5)
 
 
         remaining_phones = valid_phones.copy()
-        print(valid_phones)
-        print(len(valid_phones),'---->',len(phones))
 
 
         # for current_phone, new_phone in valid_phones:
         for i in range(len(phones)):
-            print(i,"\n"*5)
-            print("valid_phones",valid_phones)
-            print("phones",phones)
-            print("remaining_phones",remaining_phones)
             current_phone = valid_phones[i][0]
             new_phone = valid_phones[i][1]
-            print("current_phone",current_phone)
             if new_phone is None:
                 # Delete the phone number
                 query = "DELETE FROM faculty_phone_no WHERE Phone=%s AND Faculty_ID=%s"
@@ -521,7 +483,6 @@ def update_faculty(phones):
                 mycursor.execute(query, values)
                 queries['delete_phone']=querymaker(query,values)
                 remaining_phones.remove((current_phone, new_phone))
-                print("removed",current_phone,new_phone)
 
             elif new_phone != current_phone:
                 # Update the phone number
@@ -529,38 +490,25 @@ def update_faculty(phones):
                 values = (new_phone, current_phone, session['user'][0])
                 mycursor.execute(query, values)
                 queries['update_phone']=querymaker(query,values)
-                print(2)
                 remaining_phones.remove((current_phone, new_phone))
-                print("removed",current_phone,new_phone)
-                print("remaining_phones",remaining_phones)
             else:
                 # No change, keep the current phone number
                 remaining_phones.remove((current_phone, new_phone))
-                print("remaining_phones",remaining_phones)
-                print("removed",current_phone,new_phone)
-                print("No change",current_phone,new_phone)
         # Get the current phone numbers after updates
         query = "SELECT Phone FROM faculty_phone_no WHERE Faculty_ID=%s"
         mycursor.execute(query, (session['user'][0],))
         x=list(tuple(x.values())[0]for x in mycursor.fetchall())
-        print(x)
-        print(type(x))
 
         current_phones = [phone[0] for phone in x]
         queries['current_phones']=querymaker(query,(session['user'][0],))
 
         # Add any new phone numbers that weren't updates
         for _, new_phone in remaining_phones:
-            print("remaining_phones",remaining_phones)
-            print("_",_)
-            print("new_phone",new_phone)
             if new_phone:
-                print("new_phone",new_phone)
                 query = "INSERT INTO faculty_phone_no (Faculty_ID, Phone) VALUES (%s, %s)"
                 mycursor.execute(query, (session['user'][0], new_phone))
                 current_phones.append(new_phone)
                 queries['insert_phone']=querymaker(query,(session['user'][0],new_phone))
-        print('passed')
 
         return redirect(url_for('facultyDashboard', message="Updated", queries=queries))
     return redirect(url_for('facultyDashboard', error="Failed to update"))  # Redirect to dashboard with error message
@@ -829,9 +777,7 @@ def evaluate_students(exam_id, student_ids):
         query="SELECT Result_ID from results WHERE Exam_ID=%s AND Student_ID=%s"
         mycursor.execute(query,(exam_id,student_id))
         result=mycursor.fetchone()
-        print(result)
         if (result):
-            print("herer")
             result=tuple(result.values())
             query="UPDATE results SET Marks_Obtained=%s WHERE Result_ID=%s"
             values=(obtained_marks,result[0])
@@ -1025,17 +971,13 @@ def student():
 def update_student(student_id):
     if 'user' not in session:
         return redirect(url_for('login'))
-    print("here")
     if request.method == 'POST':
         queries={}
         # Initialize error flags
         errors = {}
         valid_data = {}
         # Validate name
-        print("here")
-        print(request.form)
         name = request.form.get('studentName')
-        print(name)
         if not name:
             errors['name_error'] = "Name cannot be empty"
         elif len(name) < 3:
@@ -1057,7 +999,6 @@ def update_student(student_id):
         
         # Validate address
         address = request.form.get('Address')
-        print(address)
         if not address:
             errors['address_error'] = "Address cannot be empty"
         else:
@@ -1081,7 +1022,6 @@ def update_student(student_id):
         
         # Validate date of birth
         dob = request.form.get('DOB')
-        print(dob)
         if not dob:
             errors['dob_error'] = "Date of birth is required"
         elif dob > str(datetime.datetime.now().date()):
@@ -1091,7 +1031,6 @@ def update_student(student_id):
         
         # Validate email
         email = request.form.get('studentEmail')
-        print(email)
         if not email:
             errors['email_error'] = "Email is required"
         elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
@@ -1101,7 +1040,6 @@ def update_student(student_id):
             
         # Validate work email
         work_mail = request.form.get('WorkMail')
-        print(work_mail)
         if not work_mail:
             errors['work_mail_error'] = "Work email is required"
         elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', work_mail):
@@ -1111,7 +1049,6 @@ def update_student(student_id):
         
         # Validate password
         password = request.form.get('password')
-        print(password)
         if not password:
             errors['password_error'] = "Password is required"
         elif len(password) < 8:
@@ -1122,13 +1059,10 @@ def update_student(student_id):
         # Validate phone numbers
         valid_phones = []
         invalid_phones = []
-        print(session['phones'])
         for i in session['phones']:
             temp=[]
             current_phone = i[0]
-            print(current_phone)
             new_phones = request.form.get(f'phone_{current_phone}').split(',')
-            print(new_phones,'->>>>>>>>>>>>>>')
             for new_phone in new_phones:
                 new_phone=new_phone.strip()
                 if new_phone and new_phone != current_phone:
@@ -1144,10 +1078,8 @@ def update_student(student_id):
                     
                     if is_valid:
                         temp.append((current_phone, new_phone))
-                        print("valid",new_phone)
                     else:
                         invalid_phones.append(new_phone)
-                        print("invalid",new_phone)
                 elif new_phone == current_phone:
                     # No change, keep the current phone number
                     temp.append((current_phone, current_phone))
@@ -1155,10 +1087,7 @@ def update_student(student_id):
                     # Mark for deletion
                     temp.append((current_phone, None))
                 # If unchanged, do nothing
-            print("temp",temp)
             valid_phones.extend(temp)
-            print("valid_phones -----------> ",valid_phones)
-        print(valid_phones,"^"*5)
         if invalid_phones:
             errors['phone_error'] = f"Invalid phone number format: {', '.join(invalid_phones)}"
         
@@ -1195,18 +1124,11 @@ def update_student(student_id):
         # Process phone numbers (only valid ones)
         # First, handle updates and deletions for existing phone numbers
         remaining_phones = valid_phones.copy()
-        print(valid_phones)
-        print(len(valid_phones),'---->',len(session['phones']))
 
         # for current_phone, new_phone in valid_phones:
         for i in range(len(session['phones'])):
-            print(i,"\n"*5)
-            print("valid_phones",valid_phones)
-            print("session['phones']",session['phones'])
-            print("remaining_phones",remaining_phones)
             current_phone = valid_phones[i][0]
             new_phone = valid_phones[i][1]
-            print("current_phone",current_phone)
             if new_phone is None:
                 # Delete the phone number
                 query = "DELETE FROM student_phone_no WHERE Phone=%s AND Student_ID=%s"
@@ -1214,7 +1136,6 @@ def update_student(student_id):
                 mycursor.execute(query, values)
                 queries['delete_phone']=querymaker(query,values)
                 remaining_phones.remove((current_phone, new_phone))
-                print("removed",current_phone,new_phone)
 
             elif new_phone != current_phone:
                 # Update the phone number
@@ -1222,31 +1143,19 @@ def update_student(student_id):
                 values = (new_phone, current_phone, student_id)
                 mycursor.execute(query, values)
                 queries['update_phone']=querymaker(query,values)
-                print(2)
                 remaining_phones.remove((current_phone, new_phone))
-                print("removed",current_phone,new_phone)
-                print("remaining_phones",remaining_phones)
             else:
                 # No change, keep the current phone number
                 remaining_phones.remove((current_phone, new_phone))
-                print("remaining_phones",remaining_phones)
-                print("removed",current_phone,new_phone)
-                print("No change",current_phone,new_phone)
         # Get the current phone numbers after updates
         query = "SELECT Phone FROM student_phone_no WHERE Student_ID=%s"
         mycursor.execute(query, (student_id,))
         x=list(tuple(x.values())[0]for x in mycursor.fetchall())
-        print(x)
-        print(type(x))
         current_phones = [phone[0] for phone in x]
         queries['current_phones']=querymaker(query,(student_id,))
         # Add any new phone numbers that weren't updates
         for _, new_phone in remaining_phones:
-            print("remaining_phones",remaining_phones)
-            print("_",_)
-            print("new_phone",new_phone)
             if new_phone:
-                print("new_phone",new_phone)
                 query = "INSERT INTO student_phone_no (Student_ID, Phone) VALUES (%s, %s)"
                 mycursor.execute(query, (student_id, new_phone))
                 current_phones.append(new_phone)
@@ -1508,8 +1417,6 @@ def approve_student(student_id):
     query="select `Email`, `college_email`,`password` from students where Student_ID=%s"
     mycursor.execute(query,(student_id,))
     student=tuple(mycursor.fetchone().values())
-    print(student)
-    print(type(student))
     subject = "Approval and Credentials"
     body = f"Dear Student,\n\nYour registration has been approved. Here are your credentials:\n\nEmail: {student[1]}\nPassword: {student[2]}\n\nPlease use these credentials to log in to the University Management System.\n\nBest regards,\nUniversity Management System"
     send_email(app, student[0], subject, body)
@@ -1653,7 +1560,6 @@ def filter_sorted():
     filters={}
     sorted_by={}
     if request.method == 'POST':
-        print(request.form)
         # Extract filter values from form
         if request.form.get('course_id_check'):
             filters['Course_ID'] = request.form.get('course_id')
@@ -1691,7 +1597,6 @@ def filter_sorted():
         
         # Add WHERE clause if filters exist
         if filters:
-            print("here")
             query += " WHERE " + " AND ".join([f"{key} LIKE %s" for key in filters.keys()])
             # Add wildcard for partial matches
             values = tuple([f"%{value}%" for value in filters.values()])
@@ -1700,7 +1605,6 @@ def filter_sorted():
             
         # Add ORDER BY clause if sorting parameters exist
         if order_clauses:
-            print("there")
             query += " ORDER BY " + ", ".join(order_clauses)
         # Execute query with filter values
         mycursor.execute(query, values)
@@ -2004,10 +1908,8 @@ def view_department(department_id):
     queries['department_query']=querymaker(query,(department_id,))
     try:
         department = (tuple(tuple(department.values()) for department in mycursor.fetchall()))[0]
-        print(department)
     except :
         department=mycursor.fetchone()
-        print(department)
     query = "SELECT Faculty_ID, CONCAT(First_Name, ' ', COALESCE(Middle_Name, ''), ' ', Last_Name) AS Name, Designation, Mail, Official_Mail FROM faculty WHERE Department_ID=%s AND Status='Active'"
     mycursor.execute(query, (department_id,))
     faculties= tuple(tuple(faculty.values()) for faculty in mycursor.fetchall())
@@ -2455,9 +2357,6 @@ def view_admin(admin_id):
     admins=tuple(tuple(admin.values()) for admin in mycursor.fetchall())
     display_query=request.args.get('query',None)
     if  display_query:
-        print(query)
-        print(admin_id)
-        print("*"*20)
         query=querymaker(query,(admin_id,))
     else:
         query=display_query
@@ -2489,13 +2388,11 @@ def insert_initial_data():
 def admin():
     if 'user' not in session:
         return redirect(url_for('login'))
-    print(session['user'])
     if session['user'][0]!=1:
         return redirect(url_for('main'))
     query = "SELECT * FROM admin WHERE Admin_ID=%s"
     mycursor.execute(query, (session['user'][0],))
     admin = tuple((mycursor.fetchone()).values())
-    print(admin)
     return render_template('AdminDashboard.html',message_success=request.args.get('message_success',None),message_danger=request.args.get('message_danger',None))
 
 
@@ -2537,8 +2434,9 @@ def signin():
                 return redirect(url_for('faculty'))
         elif userType == 'admin':
             mycursor.execute("SELECT * FROM admin WHERE Email=%s AND Password=%s", (email, password))
-            user = tuple((mycursor.fetchone()).values())
+            user=mycursor.fetchone()
             if user:
+                user = tuple(user.values())
                 session['user'] = user
                 return redirect(url_for('admin'))
         
@@ -2559,7 +2457,6 @@ def login():
     except:
         courses={"courses":[]}
         departments={"departments":[]}
-    print(courses,departments,sep="*"*20)  
     return render_template('SignIn.html',**courses,**departments)
 
 
@@ -2579,7 +2476,6 @@ def documentations():
             extension = os.path.splitext(file)[1][1:] # Get the file extension
             documentation_files.append((extension, file))  # Append as tuple (extension, filename.ext)
     # Render the template with the list of tuples
-    print(documentation_files)
     return render_template('documentations.html', documentation_files=documentation_files)
 
 if __name__ == '__main__':
