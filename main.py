@@ -1650,7 +1650,8 @@ def add_course():
     price = request.form.get('price')
     semester = request.form.get('semester')
     mycursor.execute("SELECT * FROM courses WHERE Course_ID=%s", (id,))
-    if tuple((mycursor.fetchone()).values()):
+    values=mycursor.fetchone()
+    if values:
         return "Course ID already exists"
     query = "INSERT INTO `courses`(`Course_ID`, `Course_Name`, `Credits`, `Semester`,`Price`) VALUES (%s, %s, %s, %s,%s)"
     values = (id, name, credits, semester, price)
@@ -1672,6 +1673,7 @@ def update_course(course_id):
     if(new_course_id!=course_id):
         query="SELECT * FROM courses WHERE Course_ID=%s"
         mycursor.execute(query,(new_course_id,))
+        
         course=tuple((mycursor.fetchone()).values())
         if course:
             return "can't update course id as it already exists"
@@ -2481,11 +2483,18 @@ def aboutme():
 @app.route('/documentations')
 def documentations():
     documentation_files = []
-    for file in os.listdir('static/files'):
-        file_path = os.path.join('static/files', file)
-        if os.path.isfile(file_path):
-            extension = os.path.splitext(file)[1][1:] # Get the file extension
-            documentation_files.append((extension, file))  # Append as tuple (extension, filename.ext)
+    # Ensure the directory exists before trying to list its contents
+    files_dir = os.path.join(app.static_folder, 'files')
+    if os.path.exists(files_dir):
+        for file in os.listdir(files_dir):
+            file_path = os.path.join(files_dir, file)
+            if os.path.isfile(file_path):
+                # Get the file extension (without the dot)
+                extension = os.path.splitext(file)[1][1:].upper() if os.path.splitext(file)[1] else 'N/A'
+                # Append as tuple (extension, filename) - assuming filename is sufficient for linking
+                # If you need the full path for linking, you might use url_for('static', filename='files/' + file)
+                documentation_files.append((extension, file))
+
     # Render the template with the list of tuples
     return render_template('documentations.html', documentation_files=documentation_files)
 @app.route('/admin/logs')
