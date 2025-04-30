@@ -40,8 +40,8 @@ try:
         connect_timeout=timeout,
         cursorclass=pymysql.cursors.DictCursor,
         db="University Management System",
-        host="mysql-182df993-miyasajid19.h.aivencloud.com",
-        password="AVNS_ximKhtxOsk6on29jNTf",
+        host="mysql-37f81e08-miyasajid19.i.aivencloud.com",
+        password="AVNS_UDomux0-cHgd9asY3yP",
         read_timeout=timeout,
         port=19571,
         user="avnadmin",
@@ -55,8 +55,8 @@ except pymysql.err.OperationalError as err:
             connect_timeout=timeout,
             cursorclass=pymysql.cursors.DictCursor,
             db="University Management System",
-            host="mysql-182df993-miyasajid19.h.aivencloud.com",
-            password="AVNS_ximKhtxOsk6on29jNTf",
+            host="mysql-37f81e08-miyasajid19.i.aivencloud.com",
+            password="AVNS_UDomux0-cHgd9asY3yP",
             read_timeout=timeout,
             port=19571,
             user="avnadmin",
@@ -323,8 +323,10 @@ def register_faculty():
             sql = "INSERT INTO faculty_phone_no (Faculty_ID, Phone) VALUES (%s, %s)"
             mycursor.execute(sql, (result, phone))
         mydb.commit()
-        
-        return render_template('index.html', message_success="Faculty registration successful.")
+        query=querymaker(query,values)
+        print(query)
+        print("-"*100)
+        return render_template('index.html', message_success="Faculty registration successful.",query=query)
     
     return render_template('registration.html')
 
@@ -373,12 +375,15 @@ def signup():
 def facultyDashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
+    print(session['user'])
+    print("*"*100)
     queries={}
     message = request.args.get('message', None)
     error = request.args.get('error', None)
     query = "SELECT faculty.Faculty_ID, CONCAT(faculty.First_Name,' ',faculty.Middle_Name,' ',faculty.Last_Name) AS Name, faculty.Date_of_Joining, faculty.Designation, faculty.Mail, faculty.Official_Mail, faculty.Password, courses.Course_Name ,department.Department_Name, department.Department_ID FROM faculty INNER JOIN courses on courses.Course_ID = faculty.Course_ID INNER JOIN department on department.Department_ID =faculty.Department_ID WHERE faculty.Faculty_ID=%s;" 
     mycursor.execute(query, (session['user'][0],))
     faculty = (tuple(tuple(exam.values()) for exam in mycursor.fetchall()))[0]
+    print(faculty)
     queries['faculty']=querymaker(query,(session['user'][0],))
     query = "select phone from faculty_phone_no where Faculty_ID=%s"
     mycursor.execute(query, (session['user'][0],))
@@ -880,7 +885,7 @@ def view_results(exam_id):
     queries['results']=querymaker(query,(exam_id,))
     query="SELECT DISTINCT courses.Course_Name, courses.Credits FROM courses INNER JOIN results ON results.Course_ID=courses.Course_ID WHERE results.Exam_ID=%s;"
     mycursor.execute(query,(exam_id,))  
-    course=(tuple(tuple(cosurse.values()) for course in mycursor.fetchall()))[0]
+    course=(tuple(tuple(course.values()) for course in mycursor.fetchall()))[0]
     queries['course']=querymaker(query,(exam_id,))
     return render_template('view_result.html', results=results, exam_id=exam_id,course=course,queries=queries)
 
@@ -2432,6 +2437,8 @@ def signin():
             user = mycursor.fetchone()
             if user:
                 user = tuple(user.values())
+                print(user)
+                print("\n"*9)
                 session['user'] = user
                 return redirect(url_for('faculty'))
         elif userType == 'admin':
