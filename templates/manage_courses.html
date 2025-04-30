@@ -25,6 +25,7 @@
             <li><a href="/admin/faculty">faculty</a></li>
             <li><a href="/admin/departments">Departments</a></li>
             <li><a href="/admin/results">Results</a></li>
+            <li><a href="/admin/logs">Logs</a></li>
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
@@ -236,8 +237,8 @@
             const select = document.getElementById(field.select);
 
             select.addEventListener('change', () => {
-            checkbox.checked = select.value !== '';
-            checkbox.value = checkbox.checked ? 'True' : 'False';
+                checkbox.checked = select.value !== '';
+                checkbox.value = checkbox.checked ? 'True' : 'False';
             });
         });
     </script>
