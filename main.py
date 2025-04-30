@@ -11,13 +11,15 @@ import ast
 import threading
 import pymysql
 import os
-app.config['MAIL_SERVER'] = credentials['MAIL_SERVER']
-app.config['MAIL_PORT'] = credentials['MAIL_PORT']
-app.config['MAIL_USE_SSL'] = credentials['MAIL_USE_SSL']
-app.config['MAIL_USE_TLS'] = credentials['MAIL_USE_TLS']
-app.config['MAIL_USERNAME'] = credentials['MAIL_USERNAME']
-app.config['MAIL_PASSWORD'] = credentials['MAIL_PASSWORD']
-app.config['MAIL_DEFAULT_SENDER'] = credentials['MAIL_DEFAULT_SENDER']
+from dotenv import load_dotenv
+load_dotenv()
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False').lower() in ['true', '1', 't']
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True').lower() in ['true', '1', 't']
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
 
 mail = Mail(app)
 
