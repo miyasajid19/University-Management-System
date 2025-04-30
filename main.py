@@ -2488,6 +2488,14 @@ def documentations():
             documentation_files.append((extension, file))  # Append as tuple (extension, filename.ext)
     # Render the template with the list of tuples
     return render_template('documentations.html', documentation_files=documentation_files)
-
+@app.route('/admin/logs')
+def admin_logs():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    query = "SELECT * FROM audit_log"
+    mycursor.execute(query)
+    logs = tuple(tuple(log.values()) for log in mycursor.fetchall())[::-1]
+    display_query = request.args.get('query', querymaker(query, None))
+    return render_template('logs.html', logs=logs, query=display_query)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8000)
