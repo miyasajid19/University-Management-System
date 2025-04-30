@@ -2490,4 +2490,4 @@ def documentations():
     return render_template('documentations.html', documentation_files=documentation_files)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
