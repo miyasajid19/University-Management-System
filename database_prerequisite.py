@@ -685,7 +685,7 @@ if __name__ == "__main__":
     create_audit_trigger() # Creates audit table and triggers (excluding audit_log)
     view() # Show contents, including audit log
     create_procedure() # Create the stored procedure
-    Demonstrate the procedure with sample data
+    # Demonstrate the procedure with sample data
     students = [
     {
         'First_Name': 'Obito',
