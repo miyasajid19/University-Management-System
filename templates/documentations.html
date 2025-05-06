@@ -21,96 +21,129 @@
             max-width: 950px;
             margin: 30px auto;
             background-color: #ffffff;
-            padding: 0 50px 40px 50px; /* Adjusted padding to make space for fixed nav if needed, or just consistent */
+            padding: 0 50px 40px 50px;
+            /* Adjusted padding to make space for fixed nav if needed, or just consistent */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             border-radius: 10px;
         }
 
         /* --- Navigation Bar Styles --- */
         .main-nav {
-            background-color: #333; /* Blue background */
+            background-color: #333;
+            /* Blue background */
             padding: 0;
-            margin: 0 -50px; /* Negative margin to stretch full width of report-container padding */
+            margin: 0 -50px;
+            /* Negative margin to stretch full width of report-container padding */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: sticky; /* Keep nav visible when scrolling */
-            top: 0; /* Stick to the top */
-            z-index: 1000; /* Ensure it's above other content */
+            position: sticky;
+            /* Keep nav visible when scrolling */
+            top: 0;
+            /* Stick to the top */
+            z-index: 1000;
+            /* Ensure it's above other content */
         }
 
         .main-nav ul {
             list-style: none;
             padding: 0;
             margin: 0;
-            display: flex; /* Arrange list items horizontally */
-            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-            justify-content: center; /* Center navigation items */
+            display: flex;
+            /* Arrange list items horizontally */
+            flex-wrap: wrap;
+            /* Allow items to wrap on smaller screens */
+            justify-content: center;
+            /* Center navigation items */
         }
 
         .main-nav ul li {
-            position: relative; /* Needed for absolute positioning of dropdowns */
+            position: relative;
+            /* Needed for absolute positioning of dropdowns */
             margin: 0;
         }
 
         .main-nav ul li a {
-            display: block; /* Make the whole area clickable */
+            display: block;
+            /* Make the whole area clickable */
             padding: 15px 20px;
             text-decoration: none;
-            color: #ffffff; /* White text */
+            color: #ffffff;
+            /* White text */
             font-weight: 500;
             transition: background-color 0.3s ease;
-            white-space: nowrap; /* Prevent links from wrapping within menu item */
+            white-space: nowrap;
+            /* Prevent links from wrapping within menu item */
         }
 
         .main-nav ul li a:hover {
-            background-color: #555; /* Darker blue on hover */
+            background-color: #555;
+            /* Darker blue on hover */
         }
 
         /* Submenu (Nested UL) */
         .main-nav ul ul {
-            display: none; /* Hide submenus by default */
+            display: none;
+            /* Hide submenus by default */
             position: absolute;
-            top: 100%; /* Position below the parent item */
+            top: 100%;
+            /* Position below the parent item */
             left: 0;
-            background-color: #ffffff; /* White background for dropdown */
+            background-color: #ffffff;
+            /* White background for dropdown */
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1010; /* Ensure submenu is above the main nav if needed */
-            min-width: 220px; /* Minimum width for dropdown */
-            flex-direction: column; /* Stack submenu items vertically */
-            border-radius: 0 0 5px 5px; /* Rounded corners at the bottom */
-            overflow: hidden; /* Hide sharp corners on wrapped content */
+            z-index: 1010;
+            /* Ensure submenu is above the main nav if needed */
+            min-width: 220px;
+            /* Minimum width for dropdown */
+            flex-direction: column;
+            /* Stack submenu items vertically */
+            border-radius: 0 0 5px 5px;
+            /* Rounded corners at the bottom */
+            overflow: hidden;
+            /* Hide sharp corners on wrapped content */
         }
 
         .main-nav ul ul li {
-            display: block; /* Stack submenu list items vertically */
-            width: 100%; /* Submenu list items take full width of parent UL */
+            display: block;
+            /* Stack submenu list items vertically */
+            width: 100%;
+            /* Submenu list items take full width of parent UL */
         }
 
         .main-nav ul ul li a {
-            padding: 10px 20px; /* Smaller padding for submenu items */
-            color: #212529; /* Dark text for submenu links */
+            padding: 10px 20px;
+            /* Smaller padding for submenu items */
+            color: #212529;
+            /* Dark text for submenu links */
         }
 
         .main-nav ul ul li a:hover {
-            background-color: #e9ecef; /* Light grey hover background */
-            color: #007bff; /* Blue text on hover */
+            background-color: #e9ecef;
+            /* Light grey hover background */
+            color: #007bff;
+            /* Blue text on hover */
         }
 
         /* Show submenu on hover */
-        .main-nav ul li:hover > ul {
-            display: flex; /* Or block, flex is used to control children display */
+        .main-nav ul li:hover>ul {
+            display: flex;
+            /* Or block, flex is used to control children display */
         }
 
         /* Further nesting - for 4.1.2, 4.2.3, 4.2.4 */
-         .main-nav ul ul ul {
-            top: 0; /* Position to the right of the parent submenu item */
+        .main-nav ul ul ul {
+            top: 0;
+            /* Position to the right of the parent submenu item */
             left: 100%;
-            margin-left: -5px; /* Small overlap */
-            border-radius: 5px; /* Rounded corners */
-         }
+            margin-left: -5px;
+            /* Small overlap */
+            border-radius: 5px;
+            /* Rounded corners */
+        }
 
-         .main-nav ul ul li:hover > ul {
-             display: flex; /* Show nested submenu on hover */
-         }
+        .main-nav ul ul li:hover>ul {
+            display: flex;
+            /* Show nested submenu on hover */
+        }
 
 
         /* Section Styles */
@@ -118,7 +151,8 @@
             margin-bottom: 40px;
             padding-bottom: 20px;
             border-bottom: 1px solid #dee2e6;
-            padding-top: 20px; /* Add some padding above sections */
+            padding-top: 20px;
+            /* Add some padding above sections */
         }
 
         section:last-of-type {
@@ -173,8 +207,8 @@
             margin-bottom: 15px;
         }
 
-         section ul li:not(.main-nav li),
-         section ol li:not(.main-nav li) {
+        section ul li:not(.main-nav li),
+        section ol li:not(.main-nav li) {
             margin-bottom: 10px;
         }
 
@@ -182,10 +216,12 @@
             margin-bottom: 15px;
             padding-left: 15px;
         }
+
         dt {
             font-weight: bold;
             margin-top: 10px;
         }
+
         dd {
             margin-left: 20px;
             margin-bottom: 10px;
@@ -286,23 +322,78 @@
             color: #6c757d;
         }
 
-        footer{
+        footer {
             background-color: #333;
         }
-        footer p{
+
+        footer p {
             color: white;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+
+        .file-list ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .file-list ul li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            /* width: 200px; */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .file-list ul li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .file-list ul li img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .file-list ul li a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .file-list ul li a:hover {
+            color: red;
+            text-decoration: underline;
         }
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .report-container {
                 margin: 15px;
-                padding: 15px; /* Reduced padding on small screens */
+                padding: 15px;
+                /* Reduced padding on small screens */
             }
 
-             .main-nav {
-                 margin: 0 -15px; /* Adjust negative margin for small screen padding */
-             }
+            .main-nav {
+                margin: 0 -15px;
+                /* Adjust negative margin for small screen padding */
+            }
 
             .title-page h1 {
                 font-size: 2em;
@@ -326,88 +417,111 @@
 
             /* Adjust nav items on small screens */
             .main-nav ul {
-                 flex-direction: column; /* Stack main nav items vertically */
-                 align-items: stretch; /* Make items fill width */
-             }
+                flex-direction: column;
+                /* Stack main nav items vertically */
+                align-items: stretch;
+                /* Make items fill width */
+            }
 
-             .main-nav ul li {
-                 width: 100%; /* Full width for main nav items */
-                 text-align: center;
-                 border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Separator */
-             }
+            .main-nav ul li {
+                width: 100%;
+                /* Full width for main nav items */
+                text-align: center;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                /* Separator */
+            }
 
-             .main-nav ul li:last-child {
-                 border-bottom: none;
-             }
+            .main-nav ul li:last-child {
+                border-bottom: none;
+            }
 
-             .main-nav ul li a {
-                 padding: 10px 15px; /* Smaller padding */
-             }
+            .main-nav ul li a {
+                padding: 10px 15px;
+                /* Smaller padding */
+            }
 
-             /* Adjust submenus for stacked layout */
-             .main-nav ul ul {
-                 position: static; /* Remove absolute positioning */
-                 box-shadow: none; /* Remove shadow */
-                 min-width: auto;
-                 background-color: rgba(0, 0, 0, 0.1); /* Slightly different background */
-                 border-radius: 0;
-                 margin-top: 5px;
-                 margin-bottom: 5px;
-             }
+            /* Adjust submenus for stacked layout */
+            .main-nav ul ul {
+                position: static;
+                /* Remove absolute positioning */
+                box-shadow: none;
+                /* Remove shadow */
+                min-width: auto;
+                background-color: rgba(0, 0, 0, 0.1);
+                /* Slightly different background */
+                border-radius: 0;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
 
-             .main-nav ul li:hover > ul {
-                display: flex; /* Submenus still show on hover */
-             }
+            .main-nav ul li:hover>ul {
+                display: flex;
+                /* Submenus still show on hover */
+            }
 
-             .main-nav ul ul ul { /* Further nested submenus */
-                 position: static; /* Remove absolute positioning */
-                 left: auto;
-                 margin-left: 0;
-                 border-radius: 0;
-             }
+            .main-nav ul ul ul {
+                /* Further nested submenus */
+                position: static;
+                /* Remove absolute positioning */
+                left: auto;
+                margin-left: 0;
+                border-radius: 0;
+            }
 
 
-             .main-nav ul ul li a {
-                 padding: 8px 30px; /* Indent submenu items */
-                 text-align: left;
-                 color: #e9ecef; /* Lighter text */
-             }
-             .main-nav ul ul li a:hover {
-                 background-color: rgba(0, 0, 0, 0.2);
-                 color: #ffffff;
-             }
+            .main-nav ul ul li a {
+                padding: 8px 30px;
+                /* Indent submenu items */
+                text-align: left;
+                color: #e9ecef;
+                /* Lighter text */
+            }
+
+            .main-nav ul ul li a:hover {
+                background-color: rgba(0, 0, 0, 0.2);
+                color: #ffffff;
+            }
         }
     </style>
-    
+
 </head>
 
 <body>
-<div class="top">
-    <nav class="nav-main" style="background-color: #333; color: #fff; padding: 10px 0; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000;">
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: center;">
-            
-            <li style="margin: 0 15px;">
-                <a href="/" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">UMS</a>
-            </li>
-            <li style="margin: 0 15px;">
-                <a href="/" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Home</a>
-            </li>
-            <li style="margin: 0 15px;">
-                <a href="/aboutme" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">About</a>
-            </li>
-            <li style="margin: 0 15px;">
-                <a href="/documentations" class="active" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease; background-color: #555; border-radius: 5px;">Documentation</a>
-            </li>
-            <li style="margin: 0 15px;">
-                <a href="/signin" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Sign In</a>
-            </li>
-            <li style="margin: 0 15px;">
-                <a href="/signup" style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Sign Up</a>
-            </li>
-        </ul>
-    </nav>
-</div>
-<br><br><br><br>
+    <div class="top">
+        <nav class="nav-main"
+            style="background-color: #333; color: #fff; padding: 10px 0; text-align: center; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000;">
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: center;">
+
+                <li style="margin: 0 15px;">
+                    <a href="/"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">UMS</a>
+                </li>
+                <li style="margin: 0 15px;">
+                    <a href="/"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Home</a>
+                </li>
+                <li style="margin: 0 15px;">
+                    <a href="/aboutme"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">About</a>
+                </li>
+                <li style="margin: 0 15px;">
+                    <a href="/documentations" class="active"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease; background-color: #555; border-radius: 5px;">Documentation</a>
+                </li>
+                <li style="margin: 0 15px;">
+                    <a href="/signin"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Sign
+                        In</a>
+                </li>
+                <li style="margin: 0 15px;">
+                    <a href="/signup"
+                        style="color: #fff; text-decoration: none; padding: 10px 15px; transition: background-color 0.3s ease;">Sign
+                        Up</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <br><br><br><br>
     <div class="report-container">
 
 
@@ -420,7 +534,7 @@
                         <li><a href="#intro-problem">1.2 Problem Statement</a></li>
                         <li><a href="#intro-objectives">1.3 Objectives</a></li>
                         <li><a href="#intro-scope">1.4 Scope of the Project</a>
-                             <ul>
+                            <ul>
                                 <li><a href="#scope-functional">1.4.1 Functional</a></li>
                                 <li><a href="#scope-technical">1.4.2 Technical</a></li>
                                 <li><a href="#scope-limitations">1.4.3 Limitations</a></li>
@@ -438,12 +552,12 @@
                     <ul>
                         <li><a href="#design-architecture">3.1 Architecture</a></li>
                         <li><a href="#design-database">3.2 Database Design</a>
-                             <ul>
-                                 <li><a href="#design-er">3.2.1 ER Diagram</a></li>
-                                 <li><a href="#design-erto-table">3.1.2 ER To Table</a></li>
-                                 <li><a href="#design-schema">3.2.3 Relational Schema</a></li>
-                                 <li><a href="#design-relationships">3.2.4 Relationship Analysis</a></li>
-                             </ul>
+                            <ul>
+                                <li><a href="#design-er">3.2.1 ER Diagram</a></li>
+                                <li><a href="#design-erto-table">3.1.2 ER To Table</a></li>
+                                <li><a href="#design-schema">3.2.3 Relational Schema</a></li>
+                                <li><a href="#design-relationships">3.2.4 Relationship Analysis</a></li>
+                            </ul>
                         </li>
                     </ul>
                 </li>
@@ -692,7 +806,8 @@
             <p>Key relationships include N:M between Students and Courses (via Enrollment), 1:N between Faculty and
                 Department, N:M between Students and Exams (via Takes_Exams), and others as detailed in the diagram.</p>
             <!-- Placeholder for ER Diagram Image -->
-            <img src="{{ url_for('static', filename='images/ER.jpg') }}" alt="Conceptual Entity-Relationship Diagram" class="screenshot">
+            <img src="{{ url_for('static', filename='images/ER.jpg') }}" alt="Conceptual Entity-Relationship Diagram"
+                class="screenshot">
             <p class="screenshot-caption">Conceptual Entity-Relationship Diagram</p>
 
 
@@ -1114,7 +1229,19 @@
             </ul>
         </section>
 
+        <section class="file-list">
+            <h1>Documentations</h1>
+            <p>Below are the files available under the <strong>static/files</strong> directory:</p>
+            <ul>
+                {% for file in documentation_files %}
+                <li>
+                    <img src="{{ url_for('static', filename='images/' + file[0] + '.png') }}" alt="File Icon">
 
+                    <a href="{{ url_for('static', filename='files/' + file[1]) }}">{{ file[1] }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
     </div> <!-- end report-container -->
     <footer style="position: unset; bottom: 0; width: 100%;  text-align: center; padding: 10px 0;">
         <p>© 2025 University Management System</p>
