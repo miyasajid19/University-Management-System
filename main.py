@@ -27,13 +27,6 @@ def send_email(app, to_email, subject, body):
     msg = Message(subject, recipients=[to_email], body=body)
     mail.send(msg)
 
-@app.route('/send_test_email')
-def send_test_email():
-    send_email(app, "miyasajid19@gmail.com", "test", "test")
-    return "Test email sent!"
-timeout = 100
-
-# Remove the exit call
 # Database connection
 try:
     mydb = pymysql.connect(
