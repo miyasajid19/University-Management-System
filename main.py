@@ -5,7 +5,6 @@ app.secret_key = '1234'
 import database_prerequisite  as setup
 from flask import Flask
 from flask_mail import Mail, Message
-from credentials import credentials
 import re
 import ast
 import threading
@@ -39,30 +38,30 @@ timeout = 100
 try:
     mydb = pymysql.connect(
         charset="utf8mb4",
-        connect_timeout=timeout,
+        connect_timeout=int(os.getenv("TIMEOUT")),
         cursorclass=pymysql.cursors.DictCursor,
-        db="University Management System",
-        host="mysql-37f81e08-miyasajid19.i.aivencloud.com",
-        password="AVNS_UDomux0-cHgd9asY3yP",
-        read_timeout=timeout,
-        port=19571,
-        user="avnadmin",
-        write_timeout=timeout,
+        db=os.getenv("DATABASE_NAME"),
+        host=os.getenv("DB_HOST"),
+        password=os.getenv("DB_PASSWORD"),
+        read_timeout=int(os.getenv("TIMEOUT")),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        write_timeout=int(os.getenv("TIMEOUT")),
     )
 except pymysql.err.OperationalError as err:
     if "Unknown database" in str(err):
         setup.create_database()
         mydb = pymysql.connect(
             charset="utf8mb4",
-            connect_timeout=timeout,
+            connect_timeout=int(os.getenv("TIMEOUT")),
             cursorclass=pymysql.cursors.DictCursor,
-            db="University Management System",
-            host="mysql-37f81e08-miyasajid19.i.aivencloud.com",
-            password="AVNS_UDomux0-cHgd9asY3yP",
-            read_timeout=timeout,
-            port=19571,
-            user="avnadmin",
-            write_timeout=timeout,
+            db=os.getenv("DATABASE_NAME"),
+            host=os.getenv("DB_HOST"),
+            password=os.getenv("DB_PASSWORD"),
+            read_timeout=int(os.getenv("TIMEOUT")),
+            port=int(os.getenv("DB_PORT")),
+            user=os.getenv("DB_USER"),
+            write_timeout=int(os.getenv("TIMEOUT")),
         )
         setup.create_tables()
         setup.insert_initial_data()
@@ -237,20 +236,24 @@ def register_student():
             INSERT INTO students (Student_ID, First_Name, Middle_Name, Last_Name, Street, District, State, Country, Gender, Date_of_Birth, Email, College_Email, Password, Enrollment_Year)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
+        queries=dict()
         values = (result, FirstName, MiddleName, LastName, street, district, state, country, gender, dob, email, mail.lower(), password, datetime.datetime.now().year)
+        queries['insert_student']=querymaker(query,values)
         mycursor.execute(query, values)
         mydb.commit()
         
         for phone in phones:
             sql = "INSERT INTO student_phone_no (Student_ID, Phone) VALUES (%s, %s)"
+            queries[f'{phone}']=querymaker(sql,(result, phone))
             mycursor.execute(sql, (result, phone))
         mydb.commit()
         
         query = "INSERT INTO fees (Student_ID, Amount, Type) VALUES (%s, %s, %s)"
         mycursor.execute(query, (result, 1500, 'Registration Fees'))
+        queries['insert_fees']=querymaker(query,(result, 1500, 'Registration Fees'))
         mydb.commit()
         
-        return render_template('index.html', message_success="Application has been submitted successfully. You will receive an email with your login credentials if accepted.")
+        return render_template('index.html', message_success="Application has been submitted successfully. You will receive an email with your login credentials if accepted.",queries=queries)
     
     return render_template('registration.html')
 
@@ -1501,22 +1504,22 @@ def adminStudents():
     queries={}
     query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year FROM students WHERE Status='Pending';"
     mycursor.execute(query)
-    pending_students = tuple(tuple(studnet.values()) for studnet in mycursor.fetchall())
+    pending_students = tuple(tuple(student.values()) for student in mycursor.fetchall())
     queries['pending_students']=querymaker(query,None)
     query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year FROM students WHERE Status='Enrolled';"
     mycursor.execute(query)
-    enrolled_students = tuple(tuple(studnet.values()) for studnet in mycursor.fetchall())
+    enrolled_students = tuple(tuple(student.values()) for student in mycursor.fetchall())
     queries['enrolled_students']=querymaker(query,None)
     
     query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year FROM students WHERE Status='Graduated';"
     mycursor.execute(query)
-    graduted_students = tuple(tuple(studnet.values()) for studnet in mycursor.fetchall())
+    graduted_students = tuple(tuple(student.values()) for student in mycursor.fetchall())
     queries['graduted_students']=querymaker(query,None)
 
 
     query = "SELECT Student_ID,CONCAT(First_Name, ' ', Middle_Name, ' ', Last_Name) AS Name, CONCAT(street, ', ', District, ', ', State, ', ', Country) AS Address, Gender, TIMESTAMPDIFF(YEAR, Date_of_Birth, CURRENT_DATE) AS Age, Email, Enrollment_Year, Graduation_Year FROM students WHERE Status='Restricted';"
     mycursor.execute(query)
-    restricated_students = tuple(tuple(studnet.values()) for studnet in mycursor.fetchall())
+    restricated_students = tuple(tuple(student.values()) for student in mycursor.fetchall())
     queries['restricated_students']=querymaker(query,None)
 
     query=request.args.get('query',None)
@@ -2507,4 +2510,4 @@ def admin_logs():
     display_query = request.args.get('query', querymaker(query, None))
     return render_template('logs.html', logs=logs, query=display_query)
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8000,debug=True)
