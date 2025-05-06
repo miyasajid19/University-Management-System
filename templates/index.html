@@ -234,6 +234,11 @@ body {
          {% if message_success %}
          <p class="success">{{ message_success }}</p>
          {% endif %}
+         {% if queries %}
+         {% for query in queries %}
+         <p class="query">{{queries[query]}}</p>
+         {% endfor %}
+         {% endif %}
          {% if query %}
          <p class="query">{{ query }}</p>
          {% endif %}
