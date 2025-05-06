@@ -2493,7 +2493,7 @@ def documentations():
             file_path = os.path.join(files_dir, file)
             if os.path.isfile(file_path):
                 # Get the file extension (without the dot)
-                extension = os.path.splitext(file)[1][1:].upper() if os.path.splitext(file)[1] else 'N/A'
+                extension = os.path.splitext(file)[1][1:].lower() if os.path.splitext(file)[1] else 'N/A'
                 # Append as tuple (extension, filename) - assuming filename is sufficient for linking
                 # If you need the full path for linking, you might use url_for('static', filename='files/' + file)
                 documentation_files.append((extension, file))
